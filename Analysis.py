@@ -1,5 +1,7 @@
-import pandas   as pd
-import numpy    as np
+import pandas      as pd
+import numpy       as np
+import scipy.stats as stats
+# import math
 
 from pathlib import Path
 from pandas.tseries.offsets import DateOffset
@@ -33,8 +35,8 @@ option_data_groupby_date = pd.DataFrame(option_data_Original.groupby('date'))
 # %%  SKEW Data from Sherry
 
 
-folder_Data = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data')
-SKEW_Sherry = pd.read_csv(folder_Data/"skew12_monthly.csv")
+folder_Sherry = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/張詠瑄')
+SKEW_Sherry = pd.read_csv(folder_Sherry/"skew12_monthly.csv")
 
 for col in SKEW_Sherry.columns: print(col)
 
@@ -54,7 +56,9 @@ SKEW_groupby_date = pd.DataFrame(SKEW_Sherry.groupby('date'))
 
 # %%  Fama-French five-factor model
 
-FF5_data_all = pd.read_csv(folder_Data/'F-F_monthly.csv')
+
+folder_FF5 = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data')
+FF5_data_all = pd.read_csv(folder_FF5/'F-F_monthly.csv')
 
 FF5_data = FF5_data_all.iloc[390:702,2:7]
 FF5_data.index = SKEW_groupby_date[0]
@@ -63,58 +67,19 @@ FF5_data.index = SKEW_groupby_date[0]
 # %%  Combine Above Dataframes
 
 
-option_SKEW_0 = option_data_Original.merge(SKEW_Sherry, left_on = ['This_Month_Option', 'cusip'], right_on = ['This_Month_Stock', 'cusip'])
-option_SKEW_0_count = pd.DataFrame(option_SKEW_0.groupby('This_Month_Option')['cusip'].count()).sort_values(by=['cusip'])
-option_SKEW_0_count.rename(columns = {'cusip':'count'}, inplace = True)
-
-# option_SKEW_0.to_csv('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/option_SKEW_0.csv')
-# option_SKEW_0_count.to_csv('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/option_SKEW_0_count.csv')
-
-
-# option_SKEW_1 = option_data_Original.merge(SKEW_Sherry, left_on = ['This_Month_Option', 'cusip'], right_on = ['Next_Month_Stock', 'cusip'])
-# option_SKEW_1_count = pd.DataFrame(option_SKEW_1.groupby('This_Month_Option')['cusip'].count()).sort_values(by=['cusip'])
-# option_SKEW_1_count.rename(columns = {'cusip':'count'}, inplace = True)
-
-
-# option_SKEW_2 = option_data_Original.merge(SKEW_Sherry, left_on = ['Next_Month_Option', 'cusip'], right_on = ['This_Month_Stock', 'cusip'])
-# option_SKEW_2_count = pd.DataFrame(option_SKEW_2.groupby('This_Month_Option')['cusip'].count()).sort_values(by=['cusip'])
-# option_SKEW_2_count.rename(columns = {'cusip':'count'}, inplace = True)
-
-
-# option_SKEW = pd.merge(option_SKEW, FF5_data, left_on = ['This_Month_Stock'], right_index = True)
-
-
+option_SKEW = option_data_Original.merge(SKEW_Sherry, left_on = ['This_Month_Option', 'cusip'], right_on = ['This_Month_Stock', 'cusip'])
+option_SKEW_count = pd.DataFrame(option_SKEW.groupby('This_Month_Option')['cusip'].count()).sort_values(by=['cusip'])
+option_SKEW_count.rename(columns = {'cusip':'count'}, inplace = True)
 
 ######################################################################################################################
                                                                                                                      #
-option_data = pd.merge(option_SKEW_0, option_SKEW_0_count, left_on = ['This_Month_Option'], right_index = True)      #
+option_data = pd.merge(option_SKEW, option_SKEW_count, left_on = ['This_Month_Option'], right_index = True)          #
                                                                                                                      #
 ######################################################################################################################
 
-
-option_data = option_data[['This_Month_Option', 'cusip', "skew1", "skew2", "Stock_Size", "Option_Size", 'Option_Return', 'count']]
+option_data = option_data[['This_Month_Option', 'cusip', 'skew1', 'skew2', 'Stock_Size', 'Option_Size', 'Option_Return', 'count']]
 option_data = option_data.set_index('This_Month_Option')
 option_data.index.name = 'date'
-
-
-# %%  Option Data with SKEW (Option Return - 20230129.egp)
-
-# folder = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/SAS - Output')
-
-# # Option Data with SKEW
-# Option_Skew   = pd.read_csv(folder/'Option_SKEW.csv')
-
-# for col in Option_Skew.columns: print(col)
-    
-# option_data = Option_Skew[['date', 'cusip', "skew1", "skew2", "size", "SHROUT", 'Buy & hold until month-end (%)']]
-
-# option_data.rename(columns = {'Buy & hold until month-end (%)':'Option_Return'}, inplace = True)
-# option_data.rename(columns = {'size':'Stock_Size'}, inplace = True)
-# option_data.rename(columns = {'SHROUT':'Option_Size'}, inplace = True)
-
-# option_data['date'] = pd.to_datetime(option_data['date'])
-# option_data = option_data.set_index('date')
-# option_data_df = pd.DataFrame(option_data.groupby('date'))
 
 
 # %%  from Lillian (volatility analysis.py)
@@ -137,6 +102,25 @@ def portfolio(data, sorted_var, split_num):
     return output
 
 
+# %%  T-statistics
+
+
+def T_statistics(data):
+    
+    # # Way 1
+    # mean = data.mean()
+    # std  = data.std()
+    # n    = len(data)
+    # T_statistics = mean / (std / math.sqrt(n))
+    
+    # Way 2
+    T_statistics = stats.ttest_1samp(data, 0)[0]
+    
+    T_statistics = '('+str("{:10.2f}".format(T_statistics))+')'
+    return T_statistics
+
+
+
 # %%  【Table】 Average returns of portfolios  (2022_RFS_Option Return Predictability - Table 3)
 
 split_num  = 5
@@ -145,102 +129,226 @@ option_data = option_data[option_data['count'] >= split_num]
 option_data_df = pd.DataFrame(option_data.groupby('date'))
 
 
-######  SKEW 1  &  Eqaul-Weighted  ######
+
+######################################################################################################################
+######################################################  SKEW 1  ######################################################
 
 sorted_var = 'skew1'
-portfolio_SKEW_1_EW = pd.DataFrame()
 
-portfolio_fin = pd.DataFrame()
+split_index = list(range(1, 1 + split_num))
+split_index.append('('+str(split_num)+'-1) Spread')
+
+EW_VW             = pd.DataFrame()
+portfolio_fin     = pd.DataFrame()
+port_split_bottom = pd.DataFrame()
+port_split_top    = pd.DataFrame()
+port_t_statistics = pd.DataFrame(columns = ['t_stats_EW', 't_stats_VW_S', 't_stats_VW_O'], index = split_index)
+
 for i in range(split_num):
-    portfolio_df = pd.DataFrame()
+    portfolio_df          = pd.DataFrame()
+    Value_Weighted_Stock  = pd.DataFrame(columns=['VW_S'], index = range(len(option_data_df)))
+    Value_Weighted_Option = pd.DataFrame(columns=['VW_O'], index = range(len(option_data_df)))
+    
     for j in range(len(option_data_df)):
         data         = option_data_df.iloc[j,1].copy()
         output       = portfolio(data, sorted_var, split_num)
         portfolio_df = pd.concat([portfolio_df, pd.DataFrame(output[i].mean()).T])
-    portfolio_df.index = option_data_df[0]
-    portfolio_fin = pd.concat([portfolio_fin, pd.DataFrame(portfolio_df.mean()).T])
+        
+        Value_Weighted_Stock.iloc[j]  = np.average(output[i]['Option_Return'], weights = output[i]['Stock_Size'])
+        Value_Weighted_Option.iloc[j] = np.average(output[i]['Option_Return'], weights = output[i]['Option_Size'])
+        
+    portfolio_df.index          = option_data_df[0]
+    Value_Weighted_Stock.index  = option_data_df[0]
+    Value_Weighted_Option.index = option_data_df[0]
+    
+    Value_Weighted_Stock  = Value_Weighted_Stock.astype(float)
+    Value_Weighted_Option = Value_Weighted_Option.astype(float)
+    
+    EW_VW         = pd.concat([portfolio_df, Value_Weighted_Stock, Value_Weighted_Option], axis=1)
+    portfolio_fin = pd.concat([portfolio_fin, pd.DataFrame(EW_VW.mean()).T])
+    
+    port_t_statistics.iloc[i]['t_stats_EW']   = T_statistics(EW_VW['Option_Return'])
+    port_t_statistics.iloc[i]['t_stats_VW_S'] = T_statistics(EW_VW['VW_S'])
+    port_t_statistics.iloc[i]['t_stats_VW_O'] = T_statistics(EW_VW['VW_O'])
+    
+    if i == 0:
+        port_split_bottom['EW']   = EW_VW['Option_Return']
+        port_split_bottom['VW_S'] = EW_VW['VW_S']
+        port_split_bottom['VW_O'] = EW_VW['VW_O']        
+        
+    elif i == split_num - 1:
+        port_split_top['EW']   = EW_VW['Option_Return']
+        port_split_top['VW_S'] = EW_VW['VW_S']
+        port_split_top['VW_O'] = EW_VW['VW_O']
+        
 
-portfolio_SKEW_1_EW['SKEW_1_EW'] = portfolio_fin['Option_Return']
-portfolio_SKEW_1_EW.index = list(range(1, 1 + split_num))
+# Average returns of portfolios
+portfolio_fin = portfolio_fin[['Option_Return', 'VW_S', 'VW_O']]
+portfolio_fin = pd.concat([portfolio_fin, pd.DataFrame(portfolio_fin.iloc[split_num-1] - portfolio_fin.iloc[0]).T])
+portfolio_fin.index = split_index
 
 
 
-######  SKEW 2  &  Eqaul-Weighted  ######
+##################################################  vvv   T-statistics  vvv  ###############################################
+
+# T-statistics of portfolios (Way 1)
+# top 跟 bottom 是那些公司在不同時間點排序然後組投資組合，不算是 two different sample
+
+t_stats_EW   = stats.ttest_ind(port_split_top['EW'],   port_split_bottom['EW'])[0]
+t_stats_VW_S = stats.ttest_ind(port_split_top['VW_S'], port_split_bottom['VW_S'])[0]
+t_stats_VW_O = stats.ttest_ind(port_split_top['VW_O'], port_split_bottom['VW_O'])[0]
+
+port_t_statistics.iloc[split_num]['t_stats_EW']   = '('+str("{:10.2f}".format(t_stats_EW))+')'
+port_t_statistics.iloc[split_num]['t_stats_VW_S'] = '('+str("{:10.2f}".format(t_stats_VW_S))+')'
+port_t_statistics.iloc[split_num]['t_stats_VW_O'] = '('+str("{:10.2f}".format(t_stats_VW_O))+')'
+
+
+# T-statistics of portfolios (Way 2)
+# 用 T_statistics = stats.ttest_1samp(data, 0)[0] 單一樣本計算 T-statistics
+t_stats_EW   = T_statistics(port_split_top['EW'] - port_split_bottom['EW'])
+t_stats_VW_S = T_statistics(port_split_top['VW_S'] - port_split_bottom['VW_S'])
+t_stats_VW_O = T_statistics(port_split_top['VW_O'] - port_split_bottom['VW_O'])
+
+port_t_statistics.iloc[split_num]['t_stats_EW']   = t_stats_EW
+port_t_statistics.iloc[split_num]['t_stats_VW_S'] = t_stats_VW_S
+port_t_statistics.iloc[split_num]['t_stats_VW_O'] = t_stats_VW_O
+
+
+# T-statistics of portfolios (Way 3)
+# 結果跟 Way 2 一樣
+t_stats_EW   = stats.ttest_rel(port_split_top['EW'],   port_split_bottom['EW'])[0]
+t_stats_VW_S = stats.ttest_rel(port_split_top['VW_S'], port_split_bottom['VW_S'])[0]
+t_stats_VW_O = stats.ttest_rel(port_split_top['VW_O'], port_split_bottom['VW_O'])[0]
+
+port_t_statistics.iloc[split_num]['t_stats_EW']   = '('+str("{:10.2f}".format(t_stats_EW))+')'
+port_t_statistics.iloc[split_num]['t_stats_VW_S'] = '('+str("{:10.2f}".format(t_stats_VW_S))+')'
+port_t_statistics.iloc[split_num]['t_stats_VW_O'] = '('+str("{:10.2f}".format(t_stats_VW_O))+')'
+
+##################################################  ^^^   T-statistics  ^^^  ###############################################
+
+
+
+portfolio_SKEW_1 = pd.DataFrame(index = split_index)
+
+portfolio_SKEW_1['SKEW_1_EW']                 = portfolio_fin['Option_Return']
+portfolio_SKEW_1['SKEW_1_EW_t_stats']         = port_t_statistics['t_stats_EW']
+portfolio_SKEW_1['SKEW_1_VW_Stock']           = portfolio_fin['VW_S']
+portfolio_SKEW_1['SKEW_1_VW_Stock_t_stats']   = port_t_statistics['t_stats_VW_S']
+portfolio_SKEW_1['SKEW_1_VW_Option']          = portfolio_fin['VW_O']
+portfolio_SKEW_1['SKEW_1_VW_Option_t_stats']  = port_t_statistics['t_stats_VW_O']
+portfolio_SKEW_1 = portfolio_SKEW_1.T
+
+
+
+
+######################################################################################################################
+######################################################  SKEW 2  ######################################################
 
 sorted_var = 'skew2'
-portfolio_SKEW_2_EW = pd.DataFrame()
 
-portfolio_fin = pd.DataFrame()
+split_index = list(range(1, 1 + split_num))
+split_index.append('('+str(split_num)+'-1) Spread')
+
+EW_VW             = pd.DataFrame()
+portfolio_fin     = pd.DataFrame()
+port_split_bottom = pd.DataFrame()
+port_split_top    = pd.DataFrame()
+port_t_statistics = pd.DataFrame(columns = ['t_stats_EW', 't_stats_VW_S', 't_stats_VW_O'], index = split_index)
+
 for i in range(split_num):
-    portfolio_df = pd.DataFrame()
+    portfolio_df          = pd.DataFrame()
+    Value_Weighted_Stock  = pd.DataFrame(columns=['VW_S'], index = range(len(option_data_df)))
+    Value_Weighted_Option = pd.DataFrame(columns=['VW_O'], index = range(len(option_data_df)))
+    
     for j in range(len(option_data_df)):
         data         = option_data_df.iloc[j,1].copy()
         output       = portfolio(data, sorted_var, split_num)
         portfolio_df = pd.concat([portfolio_df, pd.DataFrame(output[i].mean()).T])
-    portfolio_df.index = option_data_df[0]
-    portfolio_fin = pd.concat([portfolio_fin, pd.DataFrame(portfolio_df.mean()).T])
-
-portfolio_SKEW_2_EW['SKEW_2_EW'] = portfolio_fin['Option_Return']
-portfolio_SKEW_2_EW.index = list(range(1, 1 + split_num))
-
-
-
-######  SKEW 1  ######
-
-sorted_var = 'skew1'
-portfolio_SKEW_1 = pd.DataFrame()
-
-EW_VW = pd.DataFrame()
-portfolio_fin = pd.DataFrame()
-for i in range(split_num):
-    portfolio_df = pd.DataFrame()
-    Value_Weighted = pd.DataFrame(columns=['VW'], index=range(len(option_data_df)))
-    for j in range(len(option_data_df)):
-        data         = option_data_df.iloc[j,1].copy()
-        output       = portfolio(data, sorted_var, split_num)
-        portfolio_df = pd.concat([portfolio_df, pd.DataFrame(output[i].mean()).T])
-        Value_Weighted.iloc[j] = np.average(output[i]['Option_Return'], weights=output[i]['Option_Size'])
-    portfolio_df.index = option_data_df[0]
-    Value_Weighted.index = option_data_df[0]
-    EW_VW = pd.concat([portfolio_df, Value_Weighted], axis=1)
+        
+        Value_Weighted_Stock.iloc[j]  = np.average(output[i]['Option_Return'], weights = output[i]['Stock_Size'])
+        Value_Weighted_Option.iloc[j] = np.average(output[i]['Option_Return'], weights = output[i]['Option_Size'])
+        
+    portfolio_df.index          = option_data_df[0]
+    Value_Weighted_Stock.index  = option_data_df[0]
+    Value_Weighted_Option.index = option_data_df[0]
+    
+    Value_Weighted_Stock  = Value_Weighted_Stock.astype(float)
+    Value_Weighted_Option = Value_Weighted_Option.astype(float)
+    
+    EW_VW         = pd.concat([portfolio_df, Value_Weighted_Stock, Value_Weighted_Option], axis=1)
     portfolio_fin = pd.concat([portfolio_fin, pd.DataFrame(EW_VW.mean()).T])
+    
+    port_t_statistics.iloc[i]['t_stats_EW']   = T_statistics(EW_VW['Option_Return'])
+    port_t_statistics.iloc[i]['t_stats_VW_S'] = T_statistics(EW_VW['VW_S'])
+    port_t_statistics.iloc[i]['t_stats_VW_O'] = T_statistics(EW_VW['VW_O'])
+    
+    if i == 0:
+        port_split_bottom['EW']   = EW_VW['Option_Return']
+        port_split_bottom['VW_S'] = EW_VW['VW_S']
+        port_split_bottom['VW_O'] = EW_VW['VW_O']        
+        
+    elif i == split_num - 1:
+        port_split_top['EW']   = EW_VW['Option_Return']
+        port_split_top['VW_S'] = EW_VW['VW_S']
+        port_split_top['VW_O'] = EW_VW['VW_O']
+        
 
-portfolio_SKEW_1['SKEW_1_EW'] = portfolio_fin['Option_Return']
-portfolio_SKEW_1['SKEW_1_VW'] = portfolio_fin['VW']
-portfolio_SKEW_1.index = list(range(1, 1 + split_num))
-
-
-
-######  SKEW 2  ######
-
-sorted_var = 'skew2'
-portfolio_SKEW_2 = pd.DataFrame()
-
-EW_VW = pd.DataFrame()
-portfolio_fin = pd.DataFrame()
-for i in range(split_num):
-    portfolio_df = pd.DataFrame()
-    Value_Weighted = pd.DataFrame(columns=['VW'], index=range(len(option_data_df)))
-    for j in range(len(option_data_df)):
-        data         = option_data_df.iloc[j,1].copy()
-        output       = portfolio(data, sorted_var, split_num)
-        portfolio_df = pd.concat([portfolio_df, pd.DataFrame(output[i].mean()).T])
-        Value_Weighted.iloc[j] = np.average(output[i]['Option_Return'], weights=output[i]['Option_Size'])
-    portfolio_df.index = option_data_df[0]
-    Value_Weighted.index = option_data_df[0]
-    EW_VW = pd.concat([portfolio_df, Value_Weighted], axis=1)
-    portfolio_fin = pd.concat([portfolio_fin, pd.DataFrame(EW_VW.mean()).T])
-
-portfolio_SKEW_2['SKEW_2_EW'] = portfolio_fin['Option_Return']
-portfolio_SKEW_2['SKEW_2_VW'] = portfolio_fin['VW']
-portfolio_SKEW_2.index = list(range(1, 1 + split_num))
+# Average returns of portfolios
+portfolio_fin = portfolio_fin[['Option_Return', 'VW_S', 'VW_O']]
+portfolio_fin = pd.concat([portfolio_fin, pd.DataFrame(portfolio_fin.iloc[split_num-1] - portfolio_fin.iloc[0]).T])
+portfolio_fin.index = split_index
 
 
 
-######  Merge  ######
+##################################################  vvv   T-statistics  vvv  ###############################################
+
+# T-statistics of portfolios (Way 1)
+# top 跟 bottom 是那些公司在不同時間點排序然後組投資組合，不算是 two different sample
+
+t_stats_EW   = stats.ttest_ind(port_split_top['EW'],   port_split_bottom['EW'])[0]
+t_stats_VW_S = stats.ttest_ind(port_split_top['VW_S'], port_split_bottom['VW_S'])[0]
+t_stats_VW_O = stats.ttest_ind(port_split_top['VW_O'], port_split_bottom['VW_O'])[0]
+
+port_t_statistics.iloc[split_num]['t_stats_EW']   = '('+str("{:10.2f}".format(t_stats_EW))+')'
+port_t_statistics.iloc[split_num]['t_stats_VW_S'] = '('+str("{:10.2f}".format(t_stats_VW_S))+')'
+port_t_statistics.iloc[split_num]['t_stats_VW_O'] = '('+str("{:10.2f}".format(t_stats_VW_O))+')'
 
 
-Table_1 = pd.concat([portfolio_SKEW_1, portfolio_SKEW_2], axis=1).T
+# T-statistics of portfolios (Way 2)
+# 用 T_statistics = stats.ttest_1samp(data, 0)[0] 單一樣本計算 T-statistics
+t_stats_EW   = T_statistics(port_split_top['EW'] - port_split_bottom['EW'])
+t_stats_VW_S = T_statistics(port_split_top['VW_S'] - port_split_bottom['VW_S'])
+t_stats_VW_O = T_statistics(port_split_top['VW_O'] - port_split_bottom['VW_O'])
+
+port_t_statistics.iloc[split_num]['t_stats_EW']   = t_stats_EW
+port_t_statistics.iloc[split_num]['t_stats_VW_S'] = t_stats_VW_S
+port_t_statistics.iloc[split_num]['t_stats_VW_O'] = t_stats_VW_O
+
+
+# T-statistics of portfolios (Way 3)
+# 結果跟 Way 2 一樣
+t_stats_EW   = stats.ttest_rel(port_split_top['EW'],   port_split_bottom['EW'])[0]
+t_stats_VW_S = stats.ttest_rel(port_split_top['VW_S'], port_split_bottom['VW_S'])[0]
+t_stats_VW_O = stats.ttest_rel(port_split_top['VW_O'], port_split_bottom['VW_O'])[0]
+
+port_t_statistics.iloc[split_num]['t_stats_EW']   = '('+str("{:10.2f}".format(t_stats_EW))+')'
+port_t_statistics.iloc[split_num]['t_stats_VW_S'] = '('+str("{:10.2f}".format(t_stats_VW_S))+')'
+port_t_statistics.iloc[split_num]['t_stats_VW_O'] = '('+str("{:10.2f}".format(t_stats_VW_O))+')'
+
+##################################################  ^^^   T-statistics  ^^^  ###############################################
+
+
+
+# portfolio_SKEW_2 = pd.DataFrame(index = range(1, 1 + split_num))
+portfolio_SKEW_2 = pd.DataFrame(index = split_index)
+
+portfolio_SKEW_2['SKEW_2_EW']                 = portfolio_fin['Option_Return']
+portfolio_SKEW_2['SKEW_2_EW_t_stats']         = port_t_statistics['t_stats_EW']
+portfolio_SKEW_2['SKEW_2_VW_Stock']           = portfolio_fin['VW_S']
+portfolio_SKEW_2['SKEW_2_VW_Stock_t_stats']   = port_t_statistics['t_stats_VW_S']
+portfolio_SKEW_2['SKEW_2_VW_Option']          = portfolio_fin['VW_O']
+portfolio_SKEW_2['SKEW_2_VW_Option_t_stats']  = port_t_statistics['t_stats_VW_O']
+portfolio_SKEW_2 = portfolio_SKEW_2.T
 
 
 
