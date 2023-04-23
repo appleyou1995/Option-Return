@@ -61,6 +61,7 @@ SKEW_groupby_date = pd.DataFrame(SKEW_Sherry.groupby('date'))
 
 
 SKEW_Sherry_20230315 = pd.read_csv(folder_Sherry/"skew2_monthly_permno.csv")
+# for col in SKEW_Sherry_20230315.columns: print(col)
 
 SKEW_Sherry_20230315.rename(columns = {'dlycap':'Stock_Size'}, inplace = True)
 
@@ -73,6 +74,54 @@ SKEW_Sherry_20230315.rename(columns = {'date':'This_Month_Stock'}, inplace = Tru
 
 # groupby_date
 SKEW_Sherry_20230315_groupby_date = pd.DataFrame(SKEW_Sherry_20230315.groupby('date'))
+
+
+# %%  SKEW Data from Sherry [ 20230330 ]
+
+# 詠瑄：「otmp_vola_wm、atmc_vola_wm 指的意思是 otm 跟 atm 一天有很多資料時，
+#        我使用 volume 將 volatility 做 weighted mean 所得出之那一個 date 的加權的 implied volatility」
+
+folder_Sherry = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/張詠瑄')
+
+
+SKEW_1_Old_vs_New = pd.read_csv(folder_Sherry/"2023-03-30/1996-01-31_SKEW_1_Old_vs_New.csv")
+SKEW_2_Old_vs_New = pd.read_csv(folder_Sherry/"2023-03-30/1996-01-31_SKEW_2_Old_vs_New.csv")
+
+
+
+#### SKEW_1
+
+SKEW_1_Sherry_20230330 = pd.read_csv(folder_Sherry/"2023-03-30/variable_skew1_monthly.csv")
+# for col in SKEW_1_Sherry_20230330.columns: print(col)
+
+SKEW_1_Sherry_20230330.rename(columns = {'size':'Stock_Size'}, inplace = True)
+
+SKEW_1_Sherry_20230330['date'] = pd.to_datetime(SKEW_1_Sherry_20230330['date'])
+SKEW_1_Sherry_20230330 = SKEW_1_Sherry_20230330.set_index('date', drop = False)
+
+SKEW_1_Sherry_20230330.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
+
+
+# groupby_date
+SKEW_1_Sherry_20230330_groupby_date = pd.DataFrame(SKEW_1_Sherry_20230330.groupby('date'))
+
+
+
+#### SKEW_2
+
+SKEW_2_Sherry_20230330 = pd.read_csv(folder_Sherry/"2023-03-30/variable_skew2_monthly.csv")
+# for col in SKEW_2_Sherry_20230330.columns: print(col)
+
+SKEW_2_Sherry_20230330.rename(columns = {'size':'Stock_Size'}, inplace = True)
+
+SKEW_2_Sherry_20230330['date'] = pd.to_datetime(SKEW_2_Sherry_20230330['date'])
+SKEW_2_Sherry_20230330 = SKEW_2_Sherry_20230330.set_index('date', drop = False)
+
+SKEW_2_Sherry_20230330.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
+
+
+# groupby_date
+SKEW_2_Sherry_20230330_groupby_date = pd.DataFrame(SKEW_2_Sherry_20230330.groupby('date'))
 
 
 # %%  Fama-French five-factor model
@@ -116,6 +165,42 @@ option_data_20230315 = option_data_20230315[['This_Month_Option', 'PERMNO', 'SKE
                                              'Option_Return', 'count']]
 option_data_20230315 = option_data_20230315.set_index('This_Month_Option')
 option_data_20230315.index.name = 'date'
+
+
+# %%  Combine Above Dataframes [ 20230330 ]
+
+
+#### SKEW_1
+
+option_SKEW_1_20230330 = option_data_Original.merge(SKEW_1_Sherry_20230330, left_on = ['This_Month_Option', 'PERMNO'], 
+                                                                            right_on = ['This_Month_Stock', 'permno'])
+option_SKEW_1_count_20230330 = pd.DataFrame(option_SKEW_1_20230330.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
+option_SKEW_1_count_20230330.rename(columns = {'PERMNO':'count'}, inplace = True)
+
+option_data_1_20230330 = pd.merge(option_SKEW_1_20230330, option_SKEW_1_count_20230330, left_on = ['This_Month_Option'], right_index = True)
+# for col in option_data_1_20230330.columns: print(col)
+# option_data_1_20230330 = option_data_1_20230330[['This_Month_Option', 'PERMNO', 'SKEW_2', 
+#                                                  'Stock_Size', 'Option_Size', 
+#                                                  'Option_Return', 'count']]
+option_data_1_20230330 = option_data_1_20230330.set_index('This_Month_Option')
+option_data_1_20230330.index.name = 'date'
+
+
+
+#### SKEW_2
+
+option_SKEW_2_20230330 = option_data_Original.merge(SKEW_2_Sherry_20230330, left_on = ['This_Month_Option', 'PERMNO'], 
+                                                                            right_on = ['This_Month_Stock', 'permno'])
+option_SKEW_2_count_20230330 = pd.DataFrame(option_SKEW_2_20230330.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
+option_SKEW_2_count_20230330.rename(columns = {'PERMNO':'count'}, inplace = True)
+
+option_data_2_20230330 = pd.merge(option_SKEW_2_20230330, option_SKEW_2_count_20230330, left_on = ['This_Month_Option'], right_index = True)
+# for col in option_data_2_20230330.columns: print(col)
+# option_data_2_20230330 = option_data_2_20230330[['This_Month_Option', 'PERMNO', 'SKEW_2', 
+#                                                  'Stock_Size', 'Option_Size', 
+#                                                  'Option_Return', 'count']]
+option_data_2_20230330 = option_data_2_20230330.set_index('This_Month_Option')
+option_data_2_20230330.index.name = 'date'
 
 
 # %%  Split with Quantiles
@@ -287,6 +372,20 @@ portfolio_SKEW_2_10 = Table_1_Avg_returns_of_portfolios(data = option_data, sort
 portfolio_SKEW_2_20230315_3  = Table_1_Avg_returns_of_portfolios(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 3)
 portfolio_SKEW_2_20230315_5  = Table_1_Avg_returns_of_portfolios(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 5)
 portfolio_SKEW_2_20230315_10 = Table_1_Avg_returns_of_portfolios(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 10)
+
+
+# SKEW 1 [ 20230330 ]
+
+portfolio_SKEW_1_20230330_3  = Table_1_Avg_returns_of_portfolios(data = option_data_1_20230330, sorted_var = 'SKEW_1', split_num = 3)
+portfolio_SKEW_1_20230330_5  = Table_1_Avg_returns_of_portfolios(data = option_data_1_20230330, sorted_var = 'SKEW_1', split_num = 5)
+portfolio_SKEW_1_20230330_10 = Table_1_Avg_returns_of_portfolios(data = option_data_1_20230330, sorted_var = 'SKEW_1', split_num = 10)
+
+
+# SKEW 2 [ 20230330 ]
+
+portfolio_SKEW_2_20230330_3  = Table_1_Avg_returns_of_portfolios(data = option_data_2_20230330, sorted_var = 'SKEW_2', split_num = 3)
+portfolio_SKEW_2_20230330_5  = Table_1_Avg_returns_of_portfolios(data = option_data_2_20230330, sorted_var = 'SKEW_2', split_num = 5)
+portfolio_SKEW_2_20230330_10 = Table_1_Avg_returns_of_portfolios(data = option_data_2_20230330, sorted_var = 'SKEW_2', split_num = 10)
 
 
 # %%  Test
