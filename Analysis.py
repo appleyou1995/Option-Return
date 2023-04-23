@@ -2,6 +2,8 @@ import pandas      as pd
 import numpy       as np
 import scipy.stats as stats
 
+import statsmodels.formula.api as smf
+
 from pathlib import Path
 from pandas.tseries.offsets import DateOffset
 from statistics import quantiles
@@ -15,7 +17,7 @@ option_data_all = pd.read_csv(folder_SAS/"Y_SHROUT.csv")
 
 # for col in option_data_all.columns: print(col)
 
-option_data_Original = option_data_all[['date', 'cusip', "SHROUT", 'Buy & hold until month-end (%)']]
+option_data_Original = option_data_all[['date', 'cusip', 'PERMNO', 'SHROUT', 'Buy & hold until month-end (%)']]
 option_data_Original.rename(columns = {'Buy & hold until month-end (%)':'Option_Return'}, inplace = True)
 option_data_Original.rename(columns = {'SHROUT':'Option_Size'}, inplace = True)
 
@@ -38,6 +40,7 @@ option_data_groupby_date = pd.DataFrame(option_data_Original.groupby('date'))
 folder_Sherry = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/張詠瑄')
 SKEW_Sherry = pd.read_csv(folder_Sherry/"skew12_monthly.csv")
 
+
 # for col in SKEW_Sherry.columns: print(col)
 
 SKEW_Sherry.rename(columns = {'size':'Stock_Size'}, inplace = True)
@@ -52,6 +55,24 @@ SKEW_Sherry.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
 
 # groupby_date
 SKEW_groupby_date = pd.DataFrame(SKEW_Sherry.groupby('date'))
+
+
+# %%  SKEW Data from Sherry [ 20230315 ]
+
+
+SKEW_Sherry_20230315 = pd.read_csv(folder_Sherry/"skew2_monthly_permno.csv")
+
+SKEW_Sherry_20230315.rename(columns = {'dlycap':'Stock_Size'}, inplace = True)
+
+SKEW_Sherry_20230315['date'] = pd.to_datetime(SKEW_Sherry_20230315['date'])
+SKEW_Sherry_20230315 = SKEW_Sherry_20230315.set_index('date', drop = False)
+
+SKEW_Sherry_20230315 = SKEW_Sherry_20230315[['date', 'permno', 'cusip', "SKEW_2", 'Stock_Size']]
+SKEW_Sherry_20230315.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
+
+
+# groupby_date
+SKEW_Sherry_20230315_groupby_date = pd.DataFrame(SKEW_Sherry_20230315.groupby('date'))
 
 
 # %%  Fama-French five-factor model
@@ -78,6 +99,23 @@ option_data = option_data[['This_Month_Option', 'cusip', 'SKEW_1', 'SKEW_2',
                                                          'Option_Return', 'count']]
 option_data = option_data.set_index('This_Month_Option')
 option_data.index.name = 'date'
+
+
+# %%  Combine Above Dataframes [ 20230315 ]
+
+
+option_SKEW_20230315 = option_data_Original.merge(SKEW_Sherry_20230315, left_on = ['This_Month_Option', 'PERMNO'], 
+                                                                        right_on = ['This_Month_Stock', 'permno'])
+option_SKEW_count_20230315 = pd.DataFrame(option_SKEW_20230315.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
+option_SKEW_count_20230315.rename(columns = {'PERMNO':'count'}, inplace = True)
+
+option_data_20230315 = pd.merge(option_SKEW_20230315, option_SKEW_count_20230315, left_on = ['This_Month_Option'], right_index = True)
+# for col in option_data_20230315.columns: print(col)          
+option_data_20230315 = option_data_20230315[['This_Month_Option', 'PERMNO', 'SKEW_2', 
+                                             'Stock_Size', 'Option_Size', 
+                                             'Option_Return', 'count']]
+option_data_20230315 = option_data_20230315.set_index('This_Month_Option')
+option_data_20230315.index.name = 'date'
 
 
 # %%  Split with Quantiles
@@ -242,6 +280,22 @@ portfolio_SKEW_1_10 = Table_1_Avg_returns_of_portfolios(data = option_data, sort
 portfolio_SKEW_2_3  = Table_1_Avg_returns_of_portfolios(data = option_data, sorted_var = 'SKEW_2', split_num = 3)
 portfolio_SKEW_2_5  = Table_1_Avg_returns_of_portfolios(data = option_data, sorted_var = 'SKEW_2', split_num = 5)
 portfolio_SKEW_2_10 = Table_1_Avg_returns_of_portfolios(data = option_data, sorted_var = 'SKEW_2', split_num = 10)
+
+
+# SKEW 2 [ 20230315 ]
+
+portfolio_SKEW_2_20230315_3  = Table_1_Avg_returns_of_portfolios(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 3)
+portfolio_SKEW_2_20230315_5  = Table_1_Avg_returns_of_portfolios(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 5)
+portfolio_SKEW_2_20230315_10 = Table_1_Avg_returns_of_portfolios(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 10)
+
+
+# %%  Test
+
+df = pd.DataFrame({'a':port_split_top['EW'],
+                   'b':port_split_bottom['EW']})
+
+reg = smf.ols('a ~ 1 + b', data = df).fit(cov_type='HAC',cov_kwds={'maxlags':1})
+reg.summary()
 
 
 # %%  【Table】 Portfolios Sorted on Volatility Features  (Lillian - Table 4)
