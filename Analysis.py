@@ -2,7 +2,7 @@ import pandas      as pd
 import numpy       as np
 import scipy.stats as stats
 
-import statsmodels.formula.api as smf
+# import statsmodels.formula.api as smf
 
 from pathlib import Path
 from pandas.tseries.offsets import DateOffset
@@ -15,12 +15,10 @@ from tabulate import tabulate
 
 
 folder_SAS = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/SAS - Output')
-# option_data_all = pd.read_csv(folder_SAS/"Y_SHROUT.csv")
 option_data_all = pd.read_csv(folder_SAS/"Y_SHROUT_Stock.csv")
 
 # for col in option_data_all.columns: print(col)
 
-# option_data_Original = option_data_all[['date', 'cusip', 'PERMNO', 'SHROUT', 'Buy & hold until month-end (%)']]
 option_data_Original = option_data_all[['date', 'YYYYMM_t', 'cusip', 'PERMNO', 'SHROUT', 'RET', 'Buy & hold until month-end (%)']]
 
 option_data_Original.rename(columns = {'Buy & hold until month-end (%)':'Option_Return'}, inplace = True)
@@ -40,123 +38,37 @@ option_data_Original.rename(columns = {'date':'This_Month_Option'}, inplace = Tr
 option_data_groupby_date = pd.DataFrame(option_data_Original.groupby('date'))
 
 
-# %%  SKEW Data from 詠瑄 [ 20230216 ]
-
-
-folder_Sherry = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/張詠瑄')
-SKEW_Sherry = pd.read_csv(folder_Sherry/"skew12_monthly.csv")
-
-
-# for col in SKEW_Sherry.columns: print(col)
-
-SKEW_Sherry.rename(columns = {'size':'Stock_Size'}, inplace = True)
-
-SKEW_Sherry['date'] = pd.to_datetime(SKEW_Sherry['date'])
-SKEW_Sherry.insert(loc = 1, column = 'Next_Month_Stock', value = SKEW_Sherry['date'] + DateOffset(months=1))
-SKEW_Sherry = SKEW_Sherry.sort_values(by=['date', 'cusip'])
-
-SKEW_Sherry = SKEW_Sherry.set_index('date', drop = False)
-SKEW_Sherry.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
-
-
-# groupby_date
-SKEW_groupby_date = pd.DataFrame(SKEW_Sherry.groupby('date'))
-
-
-# %%  SKEW Data from 詠瑄 [ 20230315 ]
-
-
-SKEW_Sherry_20230315 = pd.read_csv(folder_Sherry/"skew2_monthly_permno.csv")
-# for col in SKEW_Sherry_20230315.columns: print(col)
-
-SKEW_Sherry_20230315.rename(columns = {'dlycap':'Stock_Size'}, inplace = True)
-
-SKEW_Sherry_20230315['date'] = pd.to_datetime(SKEW_Sherry_20230315['date'])
-SKEW_Sherry_20230315 = SKEW_Sherry_20230315.set_index('date', drop = False)
-
-SKEW_Sherry_20230315 = SKEW_Sherry_20230315[['date', 'permno', 'cusip', "SKEW_2", 'Stock_Size']]
-SKEW_Sherry_20230315.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
-
-
-# groupby_date
-SKEW_Sherry_20230315_groupby_date = pd.DataFrame(SKEW_Sherry_20230315.groupby('date'))
-
-
-# %%  SKEW Data from 詠瑄 [ 20230330 ]
-
-# 詠瑄：「otmp_vola_wm、atmc_vola_wm 指的意思是 otm 跟 atm 一天有很多資料時，
-#        我使用 volume 將 volatility 做 weighted mean 所得出之那一個 date 的加權的 implied volatility」
-
-folder_Sherry = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/張詠瑄')
-
-
-SKEW_1_Old_vs_New = pd.read_csv(folder_Sherry/"2023-03-30/1996-01-31_SKEW_1_Old_vs_New.csv")
-SKEW_2_Old_vs_New = pd.read_csv(folder_Sherry/"2023-03-30/1996-01-31_SKEW_2_Old_vs_New.csv")
-
-
-
-#### SKEW_1
-
-SKEW_1_Sherry_20230330 = pd.read_csv(folder_Sherry/"2023-03-30/variable_skew1_monthly.csv")
-# for col in SKEW_1_Sherry_20230330.columns: print(col)
-
-SKEW_1_Sherry_20230330.rename(columns = {'size':'Stock_Size'}, inplace = True)
-
-SKEW_1_Sherry_20230330['date'] = pd.to_datetime(SKEW_1_Sherry_20230330['date'])
-SKEW_1_Sherry_20230330 = SKEW_1_Sherry_20230330.set_index('date', drop = False)
-
-SKEW_1_Sherry_20230330.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
-
-
-# groupby_date
-SKEW_1_Sherry_20230330_groupby_date = pd.DataFrame(SKEW_1_Sherry_20230330.groupby('date'))
-
-
-
-#### SKEW_2
-
-SKEW_2_Sherry_20230330 = pd.read_csv(folder_Sherry/"2023-03-30/variable_skew2_monthly.csv")
-# for col in SKEW_2_Sherry_20230330.columns: print(col)
-
-SKEW_2_Sherry_20230330.rename(columns = {'size':'Stock_Size'}, inplace = True)
-
-SKEW_2_Sherry_20230330['date'] = pd.to_datetime(SKEW_2_Sherry_20230330['date'])
-SKEW_2_Sherry_20230330 = SKEW_2_Sherry_20230330.set_index('date', drop = False)
-
-SKEW_2_Sherry_20230330.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
-
-
-# groupby_date
-SKEW_2_Sherry_20230330_groupby_date = pd.DataFrame(SKEW_2_Sherry_20230330.groupby('date'))
-
-
-# %%  SKEW Data from 瑄凌 [ 20230422 ]
+# %%  SKEW Data from 瑄凌 >>> 每個 PERMNO 每月的 SKEW 平均起來當成月底資料 [ 20230426 ]
 
 
 folder_SSSherry = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/張瑄凌')
 
 ATMPC_SKEW  = pd.read_csv(folder_SSSherry/"ATMPC_SKEW.csv")
-CW2010_SKEW = pd.read_csv(folder_SSSherry/"CW2010_SKEW.csv")
+XZZ2010_SKEW = pd.read_csv(folder_SSSherry/"XZZ2010_SKEW.csv")
 
 for col in ATMPC_SKEW.columns: print(col)
-for col in CW2010_SKEW.columns: print(col)
+for col in XZZ2010_SKEW.columns: print(col)
 
-ATMPC_SKEW.rename(columns = {'firm_size':'Stock_Size'}, inplace = True)
-CW2010_SKEW.rename(columns = {'firm_size':'Stock_Size'}, inplace = True)
+ATMPC_SKEW.rename(columns = {'MEAN_of_firm_size':'Stock_Size'}, inplace = True)
+XZZ2010_SKEW.rename(columns = {'MEAN_of_firm_size':'Stock_Size'}, inplace = True)
 
-ATMPC_SKEW['date']  = pd.to_datetime(ATMPC_SKEW['date'])
-CW2010_SKEW['date'] = pd.to_datetime(CW2010_SKEW['date'])
-
-ATMPC_SKEW  = ATMPC_SKEW.set_index('date', drop = False)
-CW2010_SKEW = CW2010_SKEW.set_index('date', drop = False)
-
-ATMPC_SKEW.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
-CW2010_SKEW.rename(columns = {'date':'This_Month_Stock'}, inplace = True)
+ATMPC_SKEW.rename(columns = {'MEAN_of_ATMPC_skew':'ATMPC_skew'}, inplace = True)
+XZZ2010_SKEW.rename(columns = {'MEAN_of_skew_otmp_atmc':'skew_otmp_atmc'}, inplace = True)
 
 
-# groupby_date
-ATMPC_SKEW_groupby_date  = pd.DataFrame(ATMPC_SKEW.groupby('date'))
-CW2010_SKEW_groupby_date = pd.DataFrame(CW2010_SKEW.groupby('date'))
+# %%  SKEW Data from 瑄凌 >>> op & vol [ 20230524 ]
+
+
+folder_SSSherry = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/張瑄凌')
+
+CW2010_SKEW_op  = pd.read_csv(folder_SSSherry/"CW2010_SKEW_op.csv")
+CW2010_SKEW_vol = pd.read_csv(folder_SSSherry/"CW2010_SKEW_vol.csv")
+
+for col in CW2010_SKEW_op.columns: print(col)
+for col in CW2010_SKEW_vol.columns: print(col)
+
+CW2010_SKEW_op.rename(columns = {'CW2010_CPIV':'CW2010_SKEW_op'}, inplace = True)
+CW2010_SKEW_vol.rename(columns = {'CW2010_CPIV':'CW2010_SKEW_vol'}, inplace = True)
 
 
 # %%  Fama-French five-factor model
@@ -166,142 +78,113 @@ folder_FF5 = Path('D:/Google/我的雲端硬碟/學術研究/論文著作/Option
 FF5_data_all = pd.read_csv(folder_FF5/'F-F_monthly.csv')
 
 FF5_data = FF5_data_all.iloc[390:702,2:7]
-FF5_data.index = SKEW_groupby_date[0]
-
-
-# %%  Combine Above Dataframes [ 20230216 ]
-
-
-option_SKEW = option_data_Original.merge(SKEW_Sherry, left_on = ['This_Month_Option', 'cusip'], 
-                                                      right_on = ['This_Month_Stock', 'cusip'])
-option_SKEW_count = pd.DataFrame(option_SKEW.groupby('This_Month_Option')['cusip'].count()).sort_values(by=['cusip'])
-option_SKEW_count.rename(columns = {'cusip':'count'}, inplace = True)
-
-option_data = pd.merge(option_SKEW, option_SKEW_count, left_on = ['This_Month_Option'], right_index = True)          
-option_data = option_data[['This_Month_Option', 'cusip', 'SKEW_1', 'SKEW_2', 
-                                                         'Stock_Size', 'Option_Size', 
-                                                         'Option_Return', 'count']]
-option_data = option_data.set_index('This_Month_Option')
-option_data.index.name = 'date'
-
-
-# %%  Combine Above Dataframes [ 20230315 ]
-
-
-option_SKEW_20230315 = option_data_Original.merge(SKEW_Sherry_20230315, left_on = ['This_Month_Option', 'PERMNO'], 
-                                                                        right_on = ['This_Month_Stock', 'permno'])
-option_SKEW_count_20230315 = pd.DataFrame(option_SKEW_20230315.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
-option_SKEW_count_20230315.rename(columns = {'PERMNO':'count'}, inplace = True)
-
-option_data_20230315 = pd.merge(option_SKEW_20230315, option_SKEW_count_20230315, left_on = ['This_Month_Option'], right_index = True)
-# for col in option_data_20230315.columns: print(col)          
-option_data_20230315 = option_data_20230315[['This_Month_Option', 'PERMNO', 'SKEW_2', 
-                                             'Stock_Size', 'Option_Size', 
-                                             'Option_Return', 'count']]
-option_data_20230315 = option_data_20230315.set_index('This_Month_Option')
-option_data_20230315.index.name = 'date'
-
-
-# %%  Combine Above Dataframes [ 20230330 ]
-
-
-#### SKEW_1
-
-option_SKEW_1_20230330 = option_data_Original.merge(SKEW_1_Sherry_20230330, left_on = ['This_Month_Option', 'PERMNO'], 
-                                                                            right_on = ['This_Month_Stock', 'permno'])
-option_SKEW_1_count_20230330 = pd.DataFrame(option_SKEW_1_20230330.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
-option_SKEW_1_count_20230330.rename(columns = {'PERMNO':'count'}, inplace = True)
-
-option_data_1_20230330 = pd.merge(option_SKEW_1_20230330, option_SKEW_1_count_20230330, left_on = ['This_Month_Option'], right_index = True)
-# for col in option_data_1_20230330.columns: print(col)
-# option_data_1_20230330 = option_data_1_20230330[['This_Month_Option', 'PERMNO', 'SKEW_2', 
-#                                                  'Stock_Size', 'Option_Size', 
-#                                                  'Option_Return', 'count']]
-option_data_1_20230330 = option_data_1_20230330.set_index('This_Month_Option')
-option_data_1_20230330.index.name = 'date'
+# FF5_data.index = SKEW_groupby_date[0]
 
 
 
-#### SKEW_2
-
-option_SKEW_2_20230330 = option_data_Original.merge(SKEW_2_Sherry_20230330, left_on = ['This_Month_Option', 'PERMNO'], 
-                                                                            right_on = ['This_Month_Stock', 'permno'])
-option_SKEW_2_count_20230330 = pd.DataFrame(option_SKEW_2_20230330.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
-option_SKEW_2_count_20230330.rename(columns = {'PERMNO':'count'}, inplace = True)
-
-option_data_2_20230330 = pd.merge(option_SKEW_2_20230330, option_SKEW_2_count_20230330, left_on = ['This_Month_Option'], right_index = True)
-# for col in option_data_2_20230330.columns: print(col)
-# option_data_2_20230330 = option_data_2_20230330[['This_Month_Option', 'PERMNO', 'SKEW_2', 
-#                                                  'Stock_Size', 'Option_Size', 
-#                                                  'Option_Return', 'count']]
-option_data_2_20230330 = option_data_2_20230330.set_index('This_Month_Option')
-option_data_2_20230330.index.name = 'date'
-
-
-# %%  Combine Above Dataframes [ 20230422 ]
+# %%  Combine Above Dataframes [ 20230426 ]
 
 for col in ATMPC_SKEW.columns: print(col)
-for col in CW2010_SKEW.columns: print(col)
+for col in XZZ2010_SKEW.columns: print(col)
+
+for col in option_data_Original.columns: print(col)
+
 
 #### ATMPC_SKEW
 
-option_ATMPC_SKEW_20230422 = option_data_Original.merge(ATMPC_SKEW, 
-                                                        left_on = ['This_Month_Option', 'PERMNO'], 
-                                                        right_on = ['This_Month_Stock', 'PERMNO'])
+option_ATMPC_SKEW_20230426 = option_data_Original.merge(ATMPC_SKEW, 
+                                                        left_on = ['YYYYMM_t', 'PERMNO'], 
+                                                        right_on = ['YYYYMM', 'PERMNO'])
 
-option_ATMPC_SKEW_count_20230422 = pd.DataFrame(option_ATMPC_SKEW_20230422.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
-option_ATMPC_SKEW_count_20230422.rename(columns = {'PERMNO':'count'}, inplace = True)
+option_ATMPC_SKEW_count_20230426 = pd.DataFrame(option_ATMPC_SKEW_20230426.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
+option_ATMPC_SKEW_count_20230426.rename(columns = {'PERMNO':'count'}, inplace = True)
 
-option_data_ATMPC_20230422 = pd.merge(option_ATMPC_SKEW_20230422, option_ATMPC_SKEW_count_20230422, left_on = ['This_Month_Option'], right_index = True)
-# for col in option_ATMPC_SKEW_20230422.columns: print(col)
-# option_data_1_20230330 = option_data_1_20230330[['This_Month_Option', 'PERMNO', 'SKEW_2', 
-#                                                  'Stock_Size', 'Option_Size', 
-#                                                  'Option_Return', 'count']]
-option_data_ATMPC_20230422 = option_data_ATMPC_20230422.set_index('This_Month_Option')
-option_data_ATMPC_20230422.index.name = 'date'
+option_data_ATMPC_20230426 = pd.merge(option_ATMPC_SKEW_20230426, option_ATMPC_SKEW_count_20230426, left_on = ['This_Month_Option'], right_index = True)
+
+option_data_ATMPC_20230426 = option_data_ATMPC_20230426.set_index('This_Month_Option')
+option_data_ATMPC_20230426.index.name = 'date'
 
 
 
-#### CW2010_SKEW
+#### XZZ2010_SKEW
 
-option_CW2010_SKEW_20230422 = option_data_Original.merge(CW2010_SKEW, 
-                                                         left_on = ['This_Month_Option', 'PERMNO'], 
-                                                         right_on = ['This_Month_Stock', 'PERMNO'])
+option_XZZ2010_SKEW_20230426 = option_data_Original.merge(XZZ2010_SKEW, 
+                                                         left_on = ['YYYYMM_t', 'PERMNO'], 
+                                                         right_on = ['YYYYMM', 'PERMNO'])
 
-option_CW2010_SKEW_count_20230422 = pd.DataFrame(option_CW2010_SKEW_20230422.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
-option_CW2010_SKEW_count_20230422.rename(columns = {'PERMNO':'count'}, inplace = True)
+option_XZZ2010_SKEW_count_20230426 = pd.DataFrame(option_XZZ2010_SKEW_20230426.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
+option_XZZ2010_SKEW_count_20230426.rename(columns = {'PERMNO':'count'}, inplace = True)
 
-option_data_CW2010_20230422 = pd.merge(option_CW2010_SKEW_20230422, option_CW2010_SKEW_count_20230422, left_on = ['This_Month_Option'], right_index = True)
-# for col in option_data_CW2010_20230422.columns: print(col)
-# option_data_2_20230330 = option_data_2_20230330[['This_Month_Option', 'PERMNO', 'SKEW_2', 
-#                                                  'Stock_Size', 'Option_Size', 
-#                                                  'Option_Return', 'count']]
-option_data_CW2010_20230422 = option_data_CW2010_20230422.set_index('This_Month_Option')
-option_data_CW2010_20230422.index.name = 'date'
+option_data_XZZ2010_20230426 = pd.merge(option_XZZ2010_SKEW_20230426, option_XZZ2010_SKEW_count_20230426, left_on = ['This_Month_Option'], right_index = True)
+
+option_data_XZZ2010_20230426 = option_data_XZZ2010_20230426.set_index('This_Month_Option')
+option_data_XZZ2010_20230426.index.name = 'date'
+
+
+
+# %%  Combine Above Dataframes [ 20230524 ]
+
+for col in CW2010_SKEW_op.columns: print(col)
+for col in CW2010_SKEW_vol.columns: print(col)
+
+for col in option_data_Original.columns: print(col)
+
+
+#### CW2010_SKEW_op
+
+option_CW2010_SKEW_op_20230524 = option_data_Original.merge(CW2010_SKEW_op, 
+                                                            left_on = ['YYYYMM_t', 'PERMNO'], 
+                                                            right_on = ['YYYYMM', 'PERMNO'])
+
+option_CW2010_SKEW_op_count_20230524 = pd.DataFrame(option_CW2010_SKEW_op_20230524.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
+option_CW2010_SKEW_op_count_20230524.rename(columns = {'PERMNO':'count'}, inplace = True)
+
+option_data_CW2010_SKEW_op_20230524 = pd.merge(option_CW2010_SKEW_op_20230524, option_CW2010_SKEW_op_count_20230524, left_on = ['This_Month_Option'], right_index = True)
+
+option_data_CW2010_SKEW_op_20230524 = option_data_CW2010_SKEW_op_20230524.set_index('This_Month_Option')
+option_data_CW2010_SKEW_op_20230524.index.name = 'date'
+
+
+
+#### CW2010_SKEW_vol
+
+option_CW2010_SKEW_vol_20230524 = option_data_Original.merge(CW2010_SKEW_vol, 
+                                                             left_on = ['YYYYMM_t', 'PERMNO'], 
+                                                             right_on = ['YYYYMM', 'PERMNO'])
+
+option_CW2010_SKEW_vol_count_20230524 = pd.DataFrame(option_CW2010_SKEW_vol_20230524.groupby('This_Month_Option')['PERMNO'].count()).sort_values(by=['PERMNO'])
+option_CW2010_SKEW_vol_count_20230524.rename(columns = {'PERMNO':'count'}, inplace = True)
+
+option_data_CW2010_SKEW_vol_20230524 = pd.merge(option_CW2010_SKEW_vol_20230524, option_CW2010_SKEW_vol_count_20230524, left_on = ['This_Month_Option'], right_index = True)
+
+option_data_CW2010_SKEW_vol_20230524 = option_data_CW2010_SKEW_vol_20230524.set_index('This_Month_Option')
+option_data_CW2010_SKEW_vol_20230524.index.name = 'date'
+
 
 
 # %%  Split with Quantiles
 
 
-def portfolio(data, sorted_var, split_num):
+# def portfolio(data, sorted_var, split_num):
     
-    quantile_by = data[sorted_var]
-    quantile_list = quantiles(quantile_by, n = split_num)
+#     quantile_by = data[sorted_var]
+#     quantile_list = quantiles(quantile_by, n = split_num)
     
-    for q in range(1, split_num):
-        locals()['quantile_'+str(q)] = quantile_list[q - 1]
+#     for q in range(1, split_num):
+#         locals()['quantile_'+str(q)] = quantile_list[q - 1]
         
-    for q in range(1, split_num + 1):
-        if q == 1:
-            output = [data[data[sorted_var] < locals()['quantile_'+str(q)]]]
-        elif q == split_num:
-            output.append(data[data[sorted_var] > locals()['quantile_'+str(q-1)]])
-        else:
-            output.append(data[data[sorted_var].between(locals()['quantile_'+str(q-1)], locals()['quantile_'+str(q)])])
+#     for q in range(1, split_num + 1):
+#         if q == 1:
+#             output = [data[data[sorted_var] < locals()['quantile_'+str(q)]]]
+#         elif q == split_num:
+#             output.append(data[data[sorted_var] > locals()['quantile_'+str(q-1)]])
+#         else:
+#             output.append(data[data[sorted_var].between(locals()['quantile_'+str(q-1)], locals()['quantile_'+str(q)])])
     
-    return output
+#     return output
     
-    
+
+
 # %%  T-statistics
 
 
@@ -311,37 +194,6 @@ def T_statistics(data):
     T_statistics = '('+str("{:10.2f}".format(T_statistics))+')'
     
     return T_statistics
-
-
-# %%  Test: 用 CUSIP 做 Mapping
-
-
-option_SKEW_count.head(18)
-
-option_data_Original.loc['2011-10-31']
-SKEW_Sherry.loc['2011-10-31']
-option_data.loc['2011-10-31']
-
-option_data_Original.dtypes
-SKEW_Sherry.dtypes
-
-option_data_Original['cusip_6'] = option_data_Original['cusip'].str[:6]
-SKEW_Sherry['cusip_6'] = SKEW_Sherry['cusip'].str[:6]
-
-
-option_SKEW_6 = option_data_Original.merge(SKEW_Sherry, left_on = ['This_Month_Option', 'cusip_6'], 
-                                                        right_on = ['This_Month_Stock', 'cusip_6'])
-option_SKEW_count_6 = pd.DataFrame(option_SKEW_6.groupby('This_Month_Option')['cusip_6'].count()).sort_values(by=['cusip_6'])
-option_SKEW_count_6.head(18)
-compare = pd.concat([option_SKEW_count, option_SKEW_count_6], axis=1)
-option_SKEW_count_6.rename(columns = {'cusip_6':'count'}, inplace = True)
-
-option_data_6 = pd.merge(option_SKEW_6, option_SKEW_count_6, left_on = ['This_Month_Option'], right_index = True)          
-option_data_6 = option_data_6[['This_Month_Option', 'cusip_6', 'SKEW_1', 'SKEW_2', 
-                                                         'Stock_Size', 'Option_Size', 
-                                                         'Option_Return', 'count']]
-option_data_6 = option_data_6.set_index('This_Month_Option')
-option_data_6.index.name = 'date'
 
 
 
@@ -364,20 +216,50 @@ def Table_1_Avg_returns_of_portfolios_Option(data, sorted_var, split_num):
     
     for i in range(split_num):
         portfolio_df          = pd.DataFrame()
-        Value_Weighted_Stock  = pd.DataFrame(columns=['VW_S'], index = range(len(option_data_df)))
-        Value_Weighted_Option = pd.DataFrame(columns=['VW_O'], index = range(len(option_data_df)))
+        Value_Weighted_Stock  = pd.DataFrame(columns=['VW_S'], index = range(len(option_data_df)-1))
+        Value_Weighted_Option = pd.DataFrame(columns=['VW_O'], index = range(len(option_data_df)-1))
         
         for j in range(len(option_data_df)):
-            data         = option_data_df.iloc[j,1].copy()
-            output       = portfolio(data, sorted_var, split_num)
-            portfolio_df = pd.concat([portfolio_df, pd.DataFrame(output[i].mean()).T])
             
-            Value_Weighted_Stock.iloc[j]  = np.average(output[i]['Option_Return'], weights = output[i]['Stock_Size'])
-            Value_Weighted_Option.iloc[j] = np.average(output[i]['Option_Return'], weights = output[i]['Option_Size'])
+            # Data for This Month:
+            data = option_data_df.iloc[j,1].copy()
             
-        portfolio_df.index          = option_data_df[0]
-        Value_Weighted_Stock.index  = option_data_df[0]
-        Value_Weighted_Option.index = option_data_df[0]
+            if j == 0:   # First Month in Data
+                quantile_by = data[sorted_var]
+                quantile_list_last_month = quantiles(quantile_by, n = split_num)
+                
+            else:
+                
+                # vvvvvvvvvvvvvvvvvvvvvvv Quantile vvvvvvvvvvvvvvvvvvvvvvv #
+                
+                for q in range(1, split_num):
+                    
+                    # Create a Quantile List of Last Month (j-1) SKEW:
+                    locals()['quantile_'+str(q)] = quantile_list_last_month[q - 1]
+                    
+                for q in range(1, split_num + 1):
+                    if q == 1:
+                        output = [data[data[sorted_var] < locals()['quantile_'+str(q)]]]
+                    elif q == split_num:
+                        output.append(data[data[sorted_var] > locals()['quantile_'+str(q-1)]])
+                    else:
+                        output.append(data[data[sorted_var].between(locals()['quantile_'+str(q-1)], locals()['quantile_'+str(q)])])
+                    
+                # Create a Quantile List for use in the next month (j+1):
+                quantile_by = data[sorted_var]
+                quantile_list_last_month = quantiles(quantile_by, n = split_num)
+                
+                # ^^^^^^^^^^^^^^^^^^^^^^^ Quantile ^^^^^^^^^^^^^^^^^^^^^^^ #
+                
+                #output      = portfolio(data, sorted_var, split_num)
+                portfolio_df = pd.concat([portfolio_df, pd.DataFrame(output[i].mean()).T])
+                
+                Value_Weighted_Stock.iloc[j-1]  = np.average(output[i]['Option_Return'], weights = output[i]['Stock_Size'])
+                Value_Weighted_Option.iloc[j-1] = np.average(output[i]['Option_Return'], weights = output[i]['Option_Size'])
+            
+        portfolio_df.index          = option_data_df.iloc[1:,0]
+        Value_Weighted_Stock.index  = option_data_df.iloc[1:,0]
+        Value_Weighted_Option.index = option_data_df.iloc[1:,0]
         
         Value_Weighted_Stock  = Value_Weighted_Stock.astype(float)
         Value_Weighted_Option = Value_Weighted_Option.astype(float)
@@ -446,20 +328,50 @@ def Table_1_Avg_returns_of_portfolios_Stock(data, sorted_var, split_num):
     
     for i in range(split_num):
         portfolio_df          = pd.DataFrame()
-        Value_Weighted_Stock  = pd.DataFrame(columns=['VW_S'], index = range(len(option_data_df)))
-        Value_Weighted_Option = pd.DataFrame(columns=['VW_O'], index = range(len(option_data_df)))
+        Value_Weighted_Stock  = pd.DataFrame(columns=['VW_S'], index = range(len(option_data_df)-1))
+        Value_Weighted_Option = pd.DataFrame(columns=['VW_O'], index = range(len(option_data_df)-1))
         
         for j in range(len(option_data_df)):
-            data         = option_data_df.iloc[j,1].copy()
-            output       = portfolio(data, sorted_var, split_num)
-            portfolio_df = pd.concat([portfolio_df, pd.DataFrame(output[i].mean()).T])
             
-            Value_Weighted_Stock.iloc[j]  = np.average(output[i]['Stock_Return'], weights = output[i]['Stock_Size'])
-            Value_Weighted_Option.iloc[j] = np.average(output[i]['Stock_Return'], weights = output[i]['Option_Size'])
+            # Data for This Month:
+            data = option_data_df.iloc[j,1].copy()
             
-        portfolio_df.index          = option_data_df[0]
-        Value_Weighted_Stock.index  = option_data_df[0]
-        Value_Weighted_Option.index = option_data_df[0]
+            if j == 0:   # First Month in Data
+                quantile_by = data[sorted_var]
+                quantile_list_last_month = quantiles(quantile_by, n = split_num)
+                
+            else:
+                
+                # vvvvvvvvvvvvvvvvvvvvvvv Quantile vvvvvvvvvvvvvvvvvvvvvvv #
+                
+                for q in range(1, split_num):
+                    
+                    # Create a Quantile List of Last Month (j-1) SKEW:
+                    locals()['quantile_'+str(q)] = quantile_list_last_month[q - 1]
+                    
+                for q in range(1, split_num + 1):
+                    if q == 1:
+                        output = [data[data[sorted_var] < locals()['quantile_'+str(q)]]]
+                    elif q == split_num:
+                        output.append(data[data[sorted_var] > locals()['quantile_'+str(q-1)]])
+                    else:
+                        output.append(data[data[sorted_var].between(locals()['quantile_'+str(q-1)], locals()['quantile_'+str(q)])])
+                    
+                # Create a Quantile List for use in the next month (j+1):
+                quantile_by = data[sorted_var]
+                quantile_list_last_month = quantiles(quantile_by, n = split_num)
+                
+                # ^^^^^^^^^^^^^^^^^^^^^^^ Quantile ^^^^^^^^^^^^^^^^^^^^^^^ #
+                
+                #output      = portfolio(data, sorted_var, split_num)
+                portfolio_df = pd.concat([portfolio_df, pd.DataFrame(output[i].mean()).T])
+                
+                Value_Weighted_Stock.iloc[j-1]  = np.average(output[i]['Stock_Return'], weights = output[i]['Stock_Size'])
+                Value_Weighted_Option.iloc[j-1] = np.average(output[i]['Stock_Return'], weights = output[i]['Option_Size'])
+            
+        portfolio_df.index          = option_data_df.iloc[1:,0]
+        Value_Weighted_Stock.index  = option_data_df.iloc[1:,0]
+        Value_Weighted_Option.index = option_data_df.iloc[1:,0]
         
         Value_Weighted_Stock  = Value_Weighted_Stock.astype(float)
         Value_Weighted_Option = Value_Weighted_Option.astype(float)
@@ -510,128 +422,329 @@ def Table_1_Avg_returns_of_portfolios_Stock(data, sorted_var, split_num):
 
 
 
-# %%  詠瑄
-
-# SKEW 1 [ 20230216 ]
-
-portfolio_SKEW_1_Option_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data, sorted_var = 'SKEW_1', split_num = 3)
-portfolio_SKEW_1_Option_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data, sorted_var = 'SKEW_1', split_num = 5)
-portfolio_SKEW_1_Option_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data, sorted_var = 'SKEW_1', split_num = 10)
-
-
-# SKEW 2 [ 20230216 ]
-
-portfolio_SKEW_2_Option_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data, sorted_var = 'SKEW_2', split_num = 3)
-portfolio_SKEW_2_Option_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data, sorted_var = 'SKEW_2', split_num = 5)
-portfolio_SKEW_2_Option_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data, sorted_var = 'SKEW_2', split_num = 10)
-
-
-# SKEW 2 [ 20230315 ]
-
-portfolio_SKEW_2_Option_20230315_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 3)
-portfolio_SKEW_2_Option_20230315_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 5)
-portfolio_SKEW_2_Option_20230315_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_20230315, sorted_var = 'SKEW_2', split_num = 10)
-
-
-# SKEW 1 [ 20230330 ]
-
-portfolio_SKEW_1_Option_20230330_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_1_20230330, sorted_var = 'SKEW_1', split_num = 3)
-portfolio_SKEW_1_Option_20230330_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_1_20230330, sorted_var = 'SKEW_1', split_num = 5)
-portfolio_SKEW_1_Option_20230330_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_1_20230330, sorted_var = 'SKEW_1', split_num = 10)
-
-
-# SKEW 2 [ 20230330 ]
-
-portfolio_SKEW_2_Option_20230330_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_2_20230330, sorted_var = 'SKEW_2', split_num = 3)
-portfolio_SKEW_2_Option_20230330_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_2_20230330, sorted_var = 'SKEW_2', split_num = 5)
-portfolio_SKEW_2_Option_20230330_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_2_20230330, sorted_var = 'SKEW_2', split_num = 10)
-
-
-
 # %%  瑄凌
+
+
+# ATMPC_SKEW [ 20230426 ]
+
+# portfolio_ATMPC_SKEW_Option_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_ATMPC_20230426, 
+#                                                                           sorted_var = 'ATMPC_skew', 
+#                                                                           split_num = 3)
+
+# portfolio_ATMPC_SKEW_Option_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_ATMPC_20230426, 
+#                                                                           sorted_var = 'ATMPC_skew', 
+#                                                                           split_num = 5)
+
+# portfolio_ATMPC_SKEW_Option_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_ATMPC_20230426, 
+#                                                                           sorted_var = 'ATMPC_skew', 
+#                                                                           split_num = 10)
+
+
+# portfolio_ATMPC_SKEW_Stock_3  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_ATMPC_20230426, 
+#                                                                         sorted_var = 'ATMPC_skew', 
+#                                                                         split_num = 3)
+
+# portfolio_ATMPC_SKEW_Stock_5  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_ATMPC_20230426, 
+#                                                                         sorted_var = 'ATMPC_skew', 
+#                                                                         split_num = 5)
+
+# portfolio_ATMPC_SKEW_Stock_10 = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_ATMPC_20230426, 
+#                                                                         sorted_var = 'ATMPC_skew', 
+#                                                                         split_num = 10)
+
+
+split_set = [3, 5, 10]
+
+output_path = 'D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/Python - Output/20230426_ATMPC.xlsx'
+writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
+
+    
+for y in range(len(split_set)):
+    
+    # Option
+    
+    df_name_Option = 'portfolio_ATMPC_SKEW_Option_' + str(split_set[y])
+    df_sheet_name  = 'ATMPC_Option'
+    
+    globals()[df_name_Option] = Table_1_Avg_returns_of_portfolios_Option(data = option_data_ATMPC_20230426, 
+                                                                         sorted_var = 'ATMPC_skew', 
+                                                                         split_num = split_set[y])        
+    globals()[df_name_Option].to_excel(writer, sheet_name = df_sheet_name, startrow = 9 * y + 1)
+    
+    
+    # Stock
+    
+    df_name_Stock = 'portfolio_ATMPC_SKEW_Stock_' + str(split_set[y])
+    df_sheet_name = 'ATMPC_Stock'
+    
+    globals()[df_name_Stock] = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_ATMPC_20230426, 
+                                                                       sorted_var = 'ATMPC_skew', 
+                                                                       split_num = split_set[y])        
+    globals()[df_name_Stock].to_excel(writer, sheet_name = df_sheet_name, startrow = 9 * y + 1)
+    
+    
+writer.save()
+
+
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
 pd.options.display.width = None
 # print(tabulate(portfolio_ATMPC_SKEW_Option_3, headers='keys', tablefmt='fancy_grid'))
 
-# ATMPC_SKEW [ 20230422 ]
-
-portfolio_ATMPC_SKEW_Option_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_ATMPC_20230422, 
-                                                                          sorted_var = 'ATMPC_skew', 
-                                                                          split_num = 3)
-
-portfolio_ATMPC_SKEW_Option_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_ATMPC_20230422, 
-                                                                          sorted_var = 'ATMPC_skew', 
-                                                                          split_num = 5)
-
-portfolio_ATMPC_SKEW_Option_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_ATMPC_20230422, 
-                                                                          sorted_var = 'ATMPC_skew', 
-                                                                          split_num = 10)
+print(tabulate(portfolio_ATMPC_SKEW_Option_3,  headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_ATMPC_SKEW_Option_5,  headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_ATMPC_SKEW_Option_10, headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_ATMPC_SKEW_Stock_3,   headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_ATMPC_SKEW_Stock_5,   headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_ATMPC_SKEW_Stock_10,  headers='keys', tablefmt='fancy_grid'))
 
 
-portfolio_ATMPC_SKEW_Stock_3  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_ATMPC_20230422, 
-                                                                        sorted_var = 'ATMPC_skew', 
-                                                                        split_num = 3)
-
-portfolio_ATMPC_SKEW_Stock_5  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_ATMPC_20230422, 
-                                                                        sorted_var = 'ATMPC_skew', 
-                                                                        split_num = 5)
-
-portfolio_ATMPC_SKEW_Stock_10 = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_ATMPC_20230422, 
-                                                                        sorted_var = 'ATMPC_skew', 
-                                                                        split_num = 10)
 
 
-# CW2010_SKEW [ 20230422 ]
+# XZZ2010_SKEW [ 20230426 ]
 
-portfolio_CW2010_SKEW_Option_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_20230422, 
-                                                                           sorted_var = 'skew_otmp_atmc', 
-                                                                           split_num = 3)
+# portfolio_XZZ2010_SKEW_Option_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_XZZ2010_20230426, 
+#                                                                            sorted_var = 'skew_otmp_atmc', 
+#                                                                            split_num = 3)
 
-portfolio_CW2010_SKEW_Option_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_20230422, 
-                                                                           sorted_var = 'skew_otmp_atmc', 
-                                                                           split_num = 5)
+# portfolio_XZZ2010_SKEW_Option_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_XZZ2010_20230426, 
+#                                                                            sorted_var = 'skew_otmp_atmc', 
+#                                                                            split_num = 5)
 
-portfolio_CW2010_SKEW_Option_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_20230422, 
-                                                                           sorted_var = 'skew_otmp_atmc', 
-                                                                           split_num = 10)
+# portfolio_XZZ2010_SKEW_Option_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_XZZ2010_20230426, 
+#                                                                            sorted_var = 'skew_otmp_atmc', 
+#                                                                            split_num = 10)
 
 
-portfolio_CW2010_SKEW_Stock_3  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_20230422, 
+# portfolio_XZZ2010_SKEW_Stock_3  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_XZZ2010_20230426, 
+#                                                                          sorted_var = 'skew_otmp_atmc', 
+#                                                                          split_num = 3)
+
+# portfolio_XZZ2010_SKEW_Stock_5  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_XZZ2010_20230426, 
+#                                                                          sorted_var = 'skew_otmp_atmc', 
+#                                                                          split_num = 5)
+
+# portfolio_XZZ2010_SKEW_Stock_10 = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_XZZ2010_20230426, 
+#                                                                          sorted_var = 'skew_otmp_atmc', 
+#                                                                          split_num = 10)
+
+
+
+split_set = [3, 5, 10]
+
+output_path = 'D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/Python - Output/20230426_XZZ.xlsx'
+writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
+
+    
+for y in range(len(split_set)):
+    
+    # Option
+    
+    df_name_Option = 'portfolio_XZZ2010_SKEW_Option_' + str(split_set[y])
+    df_sheet_name  = 'XZZ2010_Option'
+    
+    globals()[df_name_Option] = Table_1_Avg_returns_of_portfolios_Option(data = option_data_XZZ2010_20230426, 
                                                                          sorted_var = 'skew_otmp_atmc', 
-                                                                         split_num = 3)
-
-portfolio_CW2010_SKEW_Stock_5  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_20230422, 
-                                                                         sorted_var = 'skew_otmp_atmc', 
-                                                                         split_num = 5)
-
-portfolio_CW2010_SKEW_Stock_10 = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_20230422, 
-                                                                         sorted_var = 'skew_otmp_atmc', 
-                                                                         split_num = 10)
-
-
-# %%  Test
-
-df = pd.DataFrame({'a':port_split_top['EW'],
-                   'b':port_split_bottom['EW']})
-
-reg = smf.ols('a ~ 1 + b', data = df).fit(cov_type='HAC',cov_kwds={'maxlags':1})
-reg.summary()
-
-
-# %%  【Table】 Portfolios Sorted on Volatility Features  (Lillian - Table 4)
+                                                                         split_num = split_set[y])        
+    globals()[df_name_Option].to_excel(writer, sheet_name = df_sheet_name, startrow = 9 * y + 1)
+    
+    
+    # Stock
+    
+    df_name_Stock = 'portfolio_XZZ2010_SKEW_Stock_' + str(split_set[y])
+    df_sheet_name = 'XZZ2010_Stock'
+    
+    globals()[df_name_Stock] = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_XZZ2010_20230426, 
+                                                                       sorted_var = 'skew_otmp_atmc', 
+                                                                       split_num = split_set[y])        
+    globals()[df_name_Stock].to_excel(writer, sheet_name = df_sheet_name, startrow = 9 * y + 1)
+    
+    
+writer.save()
 
 
 
+print(tabulate(portfolio_XZZ2010_SKEW_Option_3,  headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_XZZ2010_SKEW_Option_5,  headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_XZZ2010_SKEW_Option_10, headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_XZZ2010_SKEW_Stock_3,   headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_XZZ2010_SKEW_Stock_5,   headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_XZZ2010_SKEW_Stock_10,  headers='keys', tablefmt='fancy_grid'))
+
+
+
+# %%
+
+
+# CW2010_SKEW_op [ 20230524 ]
+
+# portfolio_CW2010_SKEW_op_Option_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_SKEW_op_20230524, 
+#                                                                            sorted_var = 'CW2010_SKEW_op', 
+#                                                                            split_num = 3)
+
+# portfolio_CW2010_SKEW_op_Option_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_SKEW_op_20230524, 
+#                                                                            sorted_var = 'CW2010_SKEW_op', 
+#                                                                            split_num = 5)
+
+# portfolio_CW2010_SKEW_op_Option_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_SKEW_op_20230524, 
+#                                                                            sorted_var = 'CW2010_SKEW_op', 
+#                                                                            split_num = 10)
+
+
+# portfolio_CW2010_SKEW_op_Stock_3  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_SKEW_op_20230524, 
+#                                                                          sorted_var = 'CW2010_SKEW_op', 
+#                                                                          split_num = 3)
+
+# portfolio_CW2010_SKEW_op_Stock_5  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_SKEW_op_20230524, 
+#                                                                          sorted_var = 'CW2010_SKEW_op', 
+#                                                                          split_num = 5)
+
+# portfolio_CW2010_SKEW_op_Stock_10 = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_SKEW_op_20230524, 
+#                                                                          sorted_var = 'CW2010_SKEW_op', 
+#                                                                          split_num = 10)
+
+
+split_set = [3, 5, 10]
+
+output_path = 'D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/Python - Output/20230524_CW2010_SKEW_op.xlsx'
+writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
+
+    
+for y in range(len(split_set)):
+    
+    # Option
+    
+    df_name_Option = 'portfolio_CW2010_SKEW_op_Option_' + str(split_set[y])
+    df_sheet_name  = 'CW2010_SKEW_op_Option'
+    
+    globals()[df_name_Option] = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_SKEW_op_20230524, 
+                                                                         sorted_var = 'CW2010_SKEW_op', 
+                                                                         split_num = split_set[y])        
+    globals()[df_name_Option].to_excel(writer, sheet_name = df_sheet_name, startrow = 9 * y + 1)
+    
+    
+    # Stock
+    
+    df_name_Stock = 'portfolio_CW2010_SKEW_op_Stock_' + str(split_set[y])
+    df_sheet_name = 'CW2010_SKEW_op_Stock'
+    
+    globals()[df_name_Stock] = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_SKEW_op_20230524, 
+                                                                       sorted_var = 'CW2010_SKEW_op', 
+                                                                       split_num = split_set[y])        
+    globals()[df_name_Stock].to_excel(writer, sheet_name = df_sheet_name, startrow = 9 * y + 1)
+    
+    
+writer.save()
+
+
+print(tabulate(portfolio_CW2010_SKEW_op_Option_3,  headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_op_Option_5,  headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_op_Option_10, headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_op_Stock_3,   headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_op_Stock_5,   headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_op_Stock_10,  headers='keys', tablefmt='fancy_grid'))
+
+
+# CW2010_SKEW_vol [ 20230524 ]
+
+# portfolio_CW2010_SKEW_vol_Option_3  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_SKEW_vol_20230524, 
+#                                                                                sorted_var = 'CW2010_SKEW_vol', 
+#                                                                                split_num = 3)
+
+# portfolio_CW2010_SKEW_vol_Option_5  = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_SKEW_vol_20230524, 
+#                                                                                sorted_var = 'CW2010_SKEW_vol', 
+#                                                                                split_num = 5)
+
+# portfolio_CW2010_SKEW_vol_Option_10 = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_SKEW_vol_20230524, 
+#                                                                                sorted_var = 'CW2010_SKEW_vol', 
+#                                                                                split_num = 10)
+
+
+# portfolio_CW2010_SKEW_vol_Stock_3  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_SKEW_vol_20230524, 
+#                                                                              sorted_var = 'CW2010_SKEW_vol', 
+#                                                                              split_num = 3)
+
+# portfolio_CW2010_SKEW_vol_Stock_5  = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_SKEW_vol_20230524, 
+#                                                                              sorted_var = 'CW2010_SKEW_vol', 
+#                                                                              split_num = 5)
+
+# portfolio_CW2010_SKEW_vol_Stock_10 = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_SKEW_vol_20230524, 
+#                                                                              sorted_var = 'CW2010_SKEW_vol', 
+#                                                                              split_num = 10)
+
+
+split_set = [3, 5, 10]
+
+output_path = 'D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/Python - Output/20230524_CW2010_SKEW_vol.xlsx'
+writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
+
+    
+for y in range(len(split_set)):
+    
+    # Option
+    
+    df_name_Option = 'portfolio_CW2010_SKEW_vol_Option_' + str(split_set[y])
+    df_sheet_name  = 'CW2010_SKEW_vol_Option'
+    
+    globals()[df_name_Option] = Table_1_Avg_returns_of_portfolios_Option(data = option_data_CW2010_SKEW_vol_20230524, 
+                                                                         sorted_var = 'CW2010_SKEW_vol', 
+                                                                         split_num = split_set[y])        
+    globals()[df_name_Option].to_excel(writer, sheet_name = df_sheet_name, startrow = 9 * y + 1)
+    
+    
+    # Stock
+    
+    df_name_Stock = 'portfolio_CW2010_SKEW_vol_Stock_' + str(split_set[y])
+    df_sheet_name = 'CW2010_SKEW_vol_Stock'
+    
+    globals()[df_name_Stock] = Table_1_Avg_returns_of_portfolios_Stock(data = option_data_CW2010_SKEW_vol_20230524, 
+                                                                       sorted_var = 'CW2010_SKEW_vol', 
+                                                                       split_num = split_set[y])        
+    globals()[df_name_Stock].to_excel(writer, sheet_name = df_sheet_name, startrow = 9 * y + 1)
+    
+    
+writer.save()
+
+
+
+print(tabulate(portfolio_CW2010_SKEW_vol_Option_3,  headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_vol_Option_5,  headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_vol_Option_10, headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_vol_Stock_3,   headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_vol_Stock_5,   headers='keys', tablefmt='fancy_grid'))
+print(tabulate(portfolio_CW2010_SKEW_vol_Stock_10,  headers='keys', tablefmt='fancy_grid'))
 
 
 
 
-# %%  【Table】 Fama-MacBeth Regressions  (Lillian - Table 5)
+# 開一個新的excel並把多個df寫到同excel不同sheet
+output_path = 'D:/Google/我的雲端硬碟/學術研究/論文著作/Option Return/Data/Python - Output/20230524.xlsx'
+writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
+
+portfolio_CW2010_SKEW_op_Option_3.to_excel(writer, sheet_name='CW2010_op_Option_3')
+portfolio_CW2010_SKEW_op_Option_5.to_excel(writer, sheet_name='CW2010_op_Option_5')
+portfolio_CW2010_SKEW_op_Option_10.to_excel(writer, sheet_name='CW2010_op_Option_10')
+portfolio_CW2010_SKEW_op_Stock_3.to_excel(writer, sheet_name='CW2010_op_Stock_3')
+portfolio_CW2010_SKEW_op_Stock_5.to_excel(writer, sheet_name='CW2010_op_Stock_5')
+portfolio_CW2010_SKEW_op_Stock_10.to_excel(writer, sheet_name='CW2010_op_Stock_10')
+
+portfolio_CW2010_SKEW_vol_Option_3.to_excel(writer, sheet_name='CW2010_vol_Option_3')
+portfolio_CW2010_SKEW_vol_Option_5.to_excel(writer, sheet_name='CW2010_vol_Option_5')
+portfolio_CW2010_SKEW_vol_Option_10.to_excel(writer, sheet_name='CW2010_vol_Option_10')
+portfolio_CW2010_SKEW_vol_Stock_3.to_excel(writer, sheet_name='CW2010_vol_Stock_3')
+portfolio_CW2010_SKEW_vol_Stock_5.to_excel(writer, sheet_name='CW2010_vol_Stock_5')
+portfolio_CW2010_SKEW_vol_Stock_10.to_excel(writer, sheet_name='CW2010_vol_Stock_10')
 
 
+# workbook  = writer.book
+# worksheet = writer.sheets['Sheet1']
+
+# fmt = writer.book.add_format({"font_name": "Arial"})
+# worksheet.set_column('A:Z', None, fmt)
+# worksheet.set_row(0, None, fmt)
 
 
+writer.save() # 存檔生成excel檔案
 
 
