@@ -63,7 +63,7 @@ XZZ2010_SKEW['MM']   = XZZ2010_SKEW['YYYYMM'].apply(str).str[4:].astype(int)
 
 #%% Import Function Path
 
-sys.path.append('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/99  自訂函數')
+sys.path.append('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Code/99  自訂函數')
 
 
 #%%  Quantile_December

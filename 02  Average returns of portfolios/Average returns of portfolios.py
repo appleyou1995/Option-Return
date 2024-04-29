@@ -17,7 +17,7 @@ option_data_CW2010_SKEW_vol_20230524 = pd.read_csv(folder_path/"option_data_CW20
 
 # %%  Import function
 
-sys.path.append('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/99  自訂函數')
+sys.path.append('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Code/99  自訂函數')
 
 
 # %%  【Table】 Average returns of portfolios (2022_RFS_Option Return Predictability - Table 3)
