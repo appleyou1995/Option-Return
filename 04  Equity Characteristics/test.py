@@ -214,7 +214,7 @@ final_table = final_table[['Mean',
                            'Excess Kurtosis']]
 
 
-markdown_table = final_table.to_markdown()
+markdown_table = final_table.round(4).to_markdown()
 
 with open('Table_4.md', 'w') as file:
     file.write(markdown_table)
