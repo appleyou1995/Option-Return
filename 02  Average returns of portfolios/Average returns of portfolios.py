@@ -1,23 +1,27 @@
 import pandas          as pd
 import sys
+import os
 
 from pathlib    import Path
 from tabulate   import tabulate
 
 
+GoogleDrive = Path('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return')
+
+
 #%%  Input Data
 
-folder_path = Path('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/Python - Output')
+folder_path = Path(GoogleDrive/'Data/Python - Output')
 
-option_data_ATMPC_20230426           = pd.read_csv(folder_path/"option_data_ATMPC_20230426.csv")
-option_data_XZZ2010_20230426         = pd.read_csv(folder_path/"option_data_XZZ2010_20230426.csv")
-option_data_CW2010_SKEW_op_20230524  = pd.read_csv(folder_path/"option_data_CW2010_SKEW_op_20230524.csv")
-option_data_CW2010_SKEW_vol_20230524 = pd.read_csv(folder_path/"option_data_CW2010_SKEW_vol_20230524.csv")
+option_data_ATMPC_20230426           = pd.read_csv(folder_path/'option_data_ATMPC.csv')
+option_data_XZZ2010_20230426         = pd.read_csv(folder_path/'option_data_XZZ2010.csv')
+option_data_CW2010_SKEW_op_20230524  = pd.read_csv(folder_path/'option_data_CW2010_SKEW_op.csv')
+option_data_CW2010_SKEW_vol_20230524 = pd.read_csv(folder_path/'option_data_CW2010_SKEW_vol.csv')
 
 
 # %%  Import function
 
-sys.path.append('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Code/99  自訂函數')
+sys.path.append(GoogleDrive/'Code/99  自訂函數')
 
 
 # %%  【Table】 Average returns of portfolios (2022_RFS_Option Return Predictability - Table 3)
@@ -31,7 +35,9 @@ from Avg_returns_of_portfolios import Table_1_Avg_returns_of_portfolios_Stock
 
 split_set = [3, 5, 10]
 
-output_path = 'D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/Python - Output/20230426_ATMPC.xlsx'
+filename = 'Data/Python - Output/20230426_ATMPC.xlsx'
+output_path = os.path.normpath(os.path.join(GoogleDrive, filename))
+
 writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
 
 
@@ -70,8 +76,8 @@ for y in range(len(split_set)):
 writer.save()
 
 
-pd.set_option("display.max_rows", None)
-pd.set_option("display.max_columns", None)
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
 pd.options.display.width = None
 # print(tabulate(portfolio_ATMPC_SKEW_Option_3, headers='keys', tablefmt='fancy_grid'))
 
@@ -88,7 +94,9 @@ print(tabulate(portfolio_ATMPC_SKEW_Stock_10,  headers='keys', tablefmt='fancy_g
 
 split_set = [3, 5, 10]
 
-output_path = 'D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/Python - Output/20230426_XZZ.xlsx'
+filename = 'Data/Python - Output/20230426_XZZ.xlsx'
+output_path = os.path.normpath(os.path.join(GoogleDrive, filename))
+
 writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
 
 
@@ -140,7 +148,9 @@ print(tabulate(portfolio_XZZ2010_SKEW_Stock_10,  headers='keys', tablefmt='fancy
 
 split_set = [3, 5, 10]
 
-output_path = 'D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/Python - Output/20230524_CW2010_SKEW_op.xlsx'
+filename = 'Data/Python - Output/20230524_CW2010_SKEW_op.xlsx'
+output_path = os.path.normpath(os.path.join(GoogleDrive, filename))
+
 writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
 
 
@@ -192,7 +202,9 @@ print(tabulate(portfolio_CW2010_SKEW_op_Stock_10,  headers='keys', tablefmt='fan
 
 split_set = [3, 5, 10]
 
-output_path = 'D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/Python - Output/20230524_CW2010_SKEW_vol.xlsx'
+filename = 'Data/Python - Output/20230524_CW2010_SKEW_vol.xlsx'
+output_path = os.path.normpath(os.path.join(GoogleDrive, filename))
+
 writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
 
 
@@ -241,7 +253,9 @@ print(tabulate(portfolio_CW2010_SKEW_vol_Stock_10,  headers='keys', tablefmt='fa
 
 #%%  開一個新的 excel 並把多個 df 寫到同 excel 不同 sheet
 
-output_path = 'D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/Python - Output/20230524.xlsx'
+filename = 'Data/Python - Output/20230524.xlsx'
+output_path = os.path.normpath(os.path.join(GoogleDrive, filename))
+
 writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
 
 portfolio_CW2010_SKEW_op_Option_3.to_excel(writer, sheet_name='CW2010_op_Option_3')

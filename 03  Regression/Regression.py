@@ -1,15 +1,19 @@
 import pandas          as pd
 import sys
+import os
 
 from pathlib                import Path
 from pandas.tseries.offsets import DateOffset
 
 
+GoogleDrive = Path('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return')
+
+
 # %%  Option Data from SAS (Option Return - 20221006.egp)
 
 
-folder_SAS = Path('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/SAS - Output')
-option_data_all = pd.read_csv(folder_SAS/"Y_SHROUT_Stock.csv")
+folder_SAS = Path(GoogleDrive/'Data/SAS - Output')
+option_data_all = pd.read_csv(folder_SAS/'Y_SHROUT_Stock.csv')
 
 # for col in option_data_all.columns: print(col)
 
@@ -31,10 +35,10 @@ option_data_Original.rename(columns = {'date':'This_Month_Option'}, inplace = Tr
 # %%  SKEW Data from 瑄凌 >>> 每個 PERMNO 每月的 SKEW 平均起來當成月底資料 [ 20230426 ]
 
 
-folder_SSSherry = Path('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/張瑄凌')
+folder_SSSherry = Path(GoogleDrive/'Data/張瑄凌')
 
-ATMPC_SKEW  = pd.read_csv(folder_SSSherry/"ATMPC_SKEW.csv")
-XZZ2010_SKEW = pd.read_csv(folder_SSSherry/"XZZ2010_SKEW.csv")
+ATMPC_SKEW   = pd.read_csv(folder_SSSherry/'ATMPC_SKEW.csv')
+XZZ2010_SKEW = pd.read_csv(folder_SSSherry/'XZZ2010_SKEW.csv')
 
 for col in ATMPC_SKEW.columns: print(col)
 for col in XZZ2010_SKEW.columns: print(col)
@@ -61,12 +65,12 @@ XZZ2010_SKEW['YYYY'] = XZZ2010_SKEW['YYYYMM'].apply(str).str[:4].astype(int)
 XZZ2010_SKEW['MM']   = XZZ2010_SKEW['YYYYMM'].apply(str).str[4:].astype(int)
 
 
-#%% Import Function Path
+# %%  Import Function Path
 
-sys.path.append('D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Code/99  自訂函數')
+sys.path.append(GoogleDrive/'Code/99  自訂函數')
 
 
-#%%  Quantile_December
+# %%  Quantile_December
     
 from Quantile_December import Quantile_December
 
@@ -131,7 +135,9 @@ Reg_XZZ2010_SKEW_Neg = regression_table(dataset = option_XZZ2010_SKEW_reg[option
 
 #%%  Ouput Regression
 
-output_path = 'D:/Google/我的雲端硬碟/學術｜研究與論文/論文著作/Option Return/Data/Python - Output/20231009.xlsx'
+filename = 'Data/Python - Output/20231009.xlsx'
+output_path = os.path.normpath(os.path.join(GoogleDrive, filename))
+
 writer = pd.ExcelWriter(output_path, engine='openpyxl') # 指定引擎openpyxl
 
 Reg_ATMPC_SKEW_All.to_excel(writer, sheet_name='Reg_ATMPC_SKEW_All')
