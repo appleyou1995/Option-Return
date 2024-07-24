@@ -122,11 +122,11 @@ for col in Merge_Data.columns: print(col)
 
 # %%  Calculate Top and Bottom split data
 
-def Top_and_Bottom(data, sorted_var, split_num):
+def Top_and_Bottom(data, sorted_var, split_num, return_type):
     data = data.dropna(subset=[sorted_var])
     data['count'] = data.groupby(['This_Month_Option'])['PERMNO'].transform('count')
     filtered_data = data[data['count'] >= split_num]
-    grouped_data = pd.DataFrame(filtered_data.groupby('DATE')) 
+    grouped_data = pd.DataFrame(filtered_data.groupby('DATE'))
     
     for i in range(split_num):
         portfolio_df = pd.DataFrame()
@@ -147,12 +147,12 @@ def Top_and_Bottom(data, sorted_var, split_num):
                 quantile_list = quantiles(month_j[sorted_var], n=split_num)
                 portfolio_df = pd.concat([portfolio_df, pd.DataFrame(quantile_bins[i].mean()).T])
                 
-                VW_Stock.iloc[j-1]  = np.average(quantile_bins[i]['Option_Return'], weights=quantile_bins[i]['Stock_Size'])
-                VW_Option.iloc[j-1] = np.average(quantile_bins[i]['Option_Return'], weights=quantile_bins[i]['Option_Size'])
+                VW_Stock.iloc[j-1]  = np.average(quantile_bins[i][return_type], weights=quantile_bins[i]['Stock_Size'])
+                VW_Option.iloc[j-1] = np.average(quantile_bins[i][return_type], weights=quantile_bins[i]['Option_Size'])
     
         VW_Stock.index = VW_Option.index = portfolio_df.index = grouped_data.iloc[1:, 0]
         VW_Stock, VW_Option = VW_Stock.astype(float), VW_Option.astype(float)
-        EW_VW = pd.concat([portfolio_df['Option_Return'], VW_Stock, VW_Option], axis=1)
+        EW_VW = pd.concat([portfolio_df[return_type], VW_Stock, VW_Option], axis=1)
     
         if i == 0:
             port_split_bottom = EW_VW
@@ -190,33 +190,61 @@ def calculate_statistics(top, bottom):
     return statistics
 
 
-# %%  Create final table
+# %%  Create final table [ Option ]
 
-final_table = pd.DataFrame()
+final_table_option = pd.DataFrame()
 
 for sorted_var in Control_Variable_List:
-    top, bottom = Top_and_Bottom(Merge_Data, sorted_var, split_num=10)
+    top, bottom = Top_and_Bottom(Merge_Data, sorted_var, split_num=10, return_type='Option_Return')
     statistics = calculate_statistics(top, bottom)
-    final_table = final_table.append(pd.DataFrame(statistics, index=[sorted_var]))
+    final_table_option = final_table_option.append(pd.DataFrame(statistics, index=[sorted_var]))
 
-final_table = final_table[['Mean',
-                           'T-stat',
-                           'NW T-stat',
-                           'Min',
-                           '10th pctl',
-                           'Q1',
-                           'Med',
-                           'Q3',
-                           '90th pctl',
-                           'Max',
-                           'SD',
-                           'Skewness',
-                           'Excess Kurtosis']]
-
-
-markdown_table = final_table.round(4).to_markdown()
-
-with open('Table_4.md', 'w') as file:
-    file.write(markdown_table)
+final_table_option = final_table_option[['Mean',
+                                         'T-stat',
+                                         'NW T-stat',
+                                         'Min',
+                                         '10th pctl',
+                                         'Q1',
+                                         'Med',
+                                         'Q3',
+                                         '90th pctl',
+                                         'Max',
+                                         'SD',
+                                         'Skewness',
+                                         'Excess Kurtosis']]
 
 
+markdown_table_option = final_table_option.round(4).to_markdown()
+
+with open('Table_4_option.md', 'w') as file:
+    file.write(markdown_table_option)
+
+
+# %%  Create final table [ Stock ]
+
+final_table_stock = pd.DataFrame()
+
+for sorted_var in Control_Variable_List:
+    top, bottom = Top_and_Bottom(Merge_Data, sorted_var, split_num=10, return_type='Stock_Return')
+    statistics = calculate_statistics(top, bottom)
+    final_table_stock = final_table_stock.append(pd.DataFrame(statistics, index=[sorted_var]))
+
+final_table_stock = final_table_stock[['Mean',
+                                       'T-stat',
+                                       'NW T-stat',
+                                       'Min',
+                                       '10th pctl',
+                                       'Q1',
+                                       'Med',
+                                       'Q3',
+                                       '90th pctl',
+                                       'Max',
+                                       'SD',
+                                       'Skewness',
+                                       'Excess Kurtosis']]
+
+
+markdown_table_stock = final_table_stock.round(4).to_markdown()
+
+with open('Table_4_stock.md', 'w') as file:
+    file.write(markdown_table_stock)
