@@ -46,12 +46,13 @@ CV['YYYYMM'] = CV['date'].dt.strftime('%Y%m').astype(int)
 
 for col in CV.columns: print(col)
 
-Control_Variable_List = CV.columns[13:22]
+CFV_columns = [col for col in CV.columns if col.startswith('CFV_')]
+Control_Variable_List = pd.Index(CFV_columns + CV.columns[13:22].tolist())
 
 
 # Paper        聶瑋瑩
 # ----------   ------------
-# CFV        = 
+# CFV        = CFV_
 # CH         = cash
 # DISP       = 
 # ISSUE_1Y   = 
@@ -79,8 +80,10 @@ Control_Basic = CV.merge(CW2010_SKEW_op,
                          right_on = ['YYYYMM', 'PERMNO'])
 
 
-Control_Basic = Control_Basic[['optionid', 'DATE', 'YYYYMM', 'PERMNO', 'cusip', 'Stock_Size', 
-                               'BM', 'logME', 'ROA', 'CF', 'cash', 'tef', 'profitable', 'logPrice', 'Zscore']]
+Control_Basic = Control_Basic[
+    ['optionid', 'DATE', 'YYYYMM', 'PERMNO', 'cusip', 'Stock_Size'] + 
+    Control_Variable_List.tolist()
+]
 
 for col in Control_Basic.columns: print(col)
 
