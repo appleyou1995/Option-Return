@@ -180,15 +180,15 @@ def calculate_statistics(top, bottom):
         'T-stat'         : stats.ttest_1samp(diff, 0)[0],
         'NW T-stat'      : nw_t_stat,
         'Min'            : diff.min(),
-        '10th pctl'      : np.percentile(diff, 10),
+        'P10'            : np.percentile(diff, 10),
         'Q1'             : np.percentile(diff, 25),
         'Med'            : np.median(diff),
         'Q3'             : np.percentile(diff, 75),
-        '90th pctl'      : np.percentile(diff, 90),
+        'P90'            : np.percentile(diff, 90),
         'Max'            : diff.max(),
         'SD'             : diff.std(),
-        'Skewness'       : stats.skew(diff),
-        'Excess Kurtosis': stats.kurtosis(diff)
+        'Skew'           : stats.skew(diff),
+        'Excess Kurt'    : stats.kurtosis(diff)
     }
     return statistics
 
