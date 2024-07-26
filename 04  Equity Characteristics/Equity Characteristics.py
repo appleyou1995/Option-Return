@@ -206,18 +206,18 @@ final_table_option = final_table_option[['Mean',
                                          'T-stat',
                                          'NW T-stat',
                                          'Min',
-                                         '10th pctl',
+                                         'P10',
                                          'Q1',
                                          'Med',
                                          'Q3',
-                                         '90th pctl',
+                                         'P90',
                                          'Max',
                                          'SD',
-                                         'Skewness',
-                                         'Excess Kurtosis']]
+                                         'Skew',
+                                         'Excess Kurt']]
 
 
-markdown_table_option = final_table_option.applymap(lambda x: '{:.2f}'.format(x)).to_markdown()
+markdown_table_option = final_table_option.applymap(lambda x: '{:.4f}'.format(x)).to_markdown()
 
 with open(os.path.join(Path_Output, 'Table_4_option.md'), 'w') as file:
     file.write(markdown_table_option)
@@ -236,18 +236,18 @@ final_table_stock = final_table_stock[['Mean',
                                        'T-stat',
                                        'NW T-stat',
                                        'Min',
-                                       '10th pctl',
+                                       'P10',
                                        'Q1',
                                        'Med',
                                        'Q3',
-                                       '90th pctl',
+                                       'P90',
                                        'Max',
                                        'SD',
-                                       'Skewness',
-                                       'Excess Kurtosis']]
+                                       'Skew',
+                                       'Excess Kurt']]
 
 
-markdown_table_stock = final_table_stock.applymap(lambda x: '{:.2f}'.format(x)).to_markdown()
+markdown_table_stock = final_table_stock.applymap(lambda x: '{:.4f}'.format(x)).to_markdown()
 
 with open(os.path.join(Path_Output, 'Table_4_stock.md'), 'w') as file:
     file.write(markdown_table_stock)
