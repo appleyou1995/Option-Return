@@ -29,7 +29,7 @@ Path_dir = os.path.join(Path_Mac, Path_PaperFolder)
 # %%  Input and Output Path
 
 Path_Input  = os.path.join(Path_dir, 'Data/')
-Path_Output = os.path.join(Path_dir, 'Data/')
+Path_Output = os.path.join(Path_dir, 'Code/04  Equity Characteristics/')
 
 
 # %%  Import function
@@ -217,9 +217,9 @@ final_table_option = final_table_option[['Mean',
                                          'Excess Kurtosis']]
 
 
-markdown_table_option = final_table_option.round(4).to_markdown()
+markdown_table_option = final_table_option.round(4).applymap(lambda x: f"{x:.4f}").to_markdown()
 
-with open('Table_4_option.md', 'w') as file:
+with open(os.path.join(Path_Output, 'Table_4_option.md'), 'w') as file:
     file.write(markdown_table_option)
 
 
@@ -247,7 +247,7 @@ final_table_stock = final_table_stock[['Mean',
                                        'Excess Kurtosis']]
 
 
-markdown_table_stock = final_table_stock.round(4).to_markdown()
+markdown_table_stock = final_table_stock.round(4).applymap(lambda x: f"{x:.4f}").to_markdown()
 
-with open('Table_4_stock.md', 'w') as file:
+with open(os.path.join(Path_Output, 'Table_4_stock.md'), 'w') as file:
     file.write(markdown_table_stock)
