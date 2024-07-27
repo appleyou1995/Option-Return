@@ -421,7 +421,7 @@ for control_var in Control_Variable_List:
             'coef_CV': mean_betas[1],
             't_stats_CV': t_stats[1],
             'coef_CW2010_SKEW_vol': mean_betas[2],
-            'CW2010_SKEW_vol_t_stats': t_stats[2]
+            't_stats_CW2010_SKEW_vol': t_stats[2]
         })
 
 #############################  GitHub上的易讀版本  #############################
