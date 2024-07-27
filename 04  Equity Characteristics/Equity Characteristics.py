@@ -75,13 +75,18 @@ CW2010_SKEW_vol.rename(columns = {'CW2010_CPIV':'CW2010_SKEW_vol'}, inplace = Tr
 
 # %%  Merge Stock_Size
 
-Control_Basic = CV.merge(CW2010_SKEW_op, 
-                         left_on = ['YYYYMM', 'permno'], 
-                         right_on = ['YYYYMM', 'PERMNO'])
+Control_Basic_temp = CV.merge(CW2010_SKEW_op, 
+                              left_on=['YYYYMM', 'permno'], 
+                              right_on=['YYYYMM', 'PERMNO'], 
+                              suffixes=('', '_op'))
 
+Control_Basic = Control_Basic_temp.merge(CW2010_SKEW_vol, 
+                                         left_on=['YYYYMM', 'permno'], 
+                                         right_on=['YYYYMM', 'PERMNO'], 
+                                         suffixes=('', '_vol'))
 
 Control_Basic = Control_Basic[
-    ['optionid', 'DATE', 'YYYYMM', 'PERMNO', 'cusip', 'Stock_Size'] + 
+    ['optionid', 'DATE', 'YYYYMM', 'PERMNO', 'cusip', 'Stock_Size', 'CW2010_SKEW_op', 'CW2010_SKEW_vol'] + 
     Control_Variable_List.tolist()
 ]
 
@@ -251,3 +256,184 @@ markdown_table_stock = final_table_stock.applymap(lambda x: '{:.4f}'.format(x)).
 
 with open(os.path.join(Path_Output, 'Table_4_stock.md'), 'w') as file:
     file.write(markdown_table_stock)
+
+
+# %%###########################################################################
+#                          Fama–MacBeth regression
+# #############################################################################
+
+
+def newey_west_se(model, lags):
+    se = sm.stats.sandwich_covariance.cov_hac(model, nlags=lags)
+    return np.sqrt(np.diag(se))
+
+
+def fama_macbeth_regression(df, y_col, x_cols):
+    periods = df['YYYYMM'].unique()
+    betas = []
+
+    # 第一階段橫斷面迴歸
+    for period in periods:
+        df_period = df[df['YYYYMM'] == period].replace([np.inf, -np.inf], np.nan).dropna(subset=[y_col] + x_cols)
+        
+        y = df_period[y_col]
+        X = df_period[x_cols]
+        X = sm.add_constant(X)
+        
+        model = sm.OLS(y, X).fit()
+        betas.append(model.params.values)
+
+    betas = np.array(betas)
+    mean_betas = betas.mean(axis=0)
+
+    # 第二階段時間序列迴歸
+    t_stats = []
+    for i in range(betas.shape[1]):
+        y = betas[:, i]
+        X = np.ones(len(y))
+        model = sm.OLS(y, X).fit()
+        nw_se = newey_west_se(model, lags=4)
+        t_stats.append(model.params[0] / nw_se[0])
+
+    return mean_betas, t_stats
+
+
+# %%  [ Example ] Single CV Checking
+
+# (1) No controls
+mean_betas_1, t_stats_1 = fama_macbeth_regression(Merge_Data, 'Option_Return', ['CFV_2y'])
+
+result_1 = pd.DataFrame({
+    'factor': ['const', 'CFV_2y'],
+    'mean_coef': mean_betas_1,
+    'NW_t_value': t_stats_1
+})
+
+print(result_1)
+
+
+# (2) Control for CW2010_SKEW_op
+mean_betas_2, t_stats_2 = fama_macbeth_regression(Merge_Data, 'Option_Return', ['tef', 'CW2010_SKEW_vol'])
+
+result_2 = pd.DataFrame({
+    'factor': ['const', 'tef', 'CW2010_SKEW_vol'],
+    'mean_coef': mean_betas_2,
+    'NW_t_value': t_stats_2
+})
+
+print(result_2)
+
+
+# %%  (1) No controls
+
+No_controls = []
+
+for control_var in Control_Variable_List:
+    mean_betas, t_stats = fama_macbeth_regression(Merge_Data, 'Option_Return', [control_var])
+    
+    for var in enumerate([control_var]):
+        No_controls.append({
+            'variable': var[1],
+            'const_coef': mean_betas[0],
+            'const_NW_t_stats': t_stats[0],
+            'CV_coef': mean_betas[1],
+            'CV_NW_t_stats': t_stats[1]
+        })
+
+#############################  GitHub上的易讀版本  #############################
+
+Table_7_No_controls = pd.DataFrame(No_controls)
+Table_7_No_controls['const_coef'] = Table_7_No_controls['const_coef'].map(lambda x: f"{x:.3f}")
+Table_7_No_controls['CV_coef'] = Table_7_No_controls['CV_coef'].map(lambda x: f"{x:.3f}")
+
+Table_7_No_controls['const_NW_t_stats'] = Table_7_No_controls['const_NW_t_stats'].map(lambda x: f"{x:.2f}")
+Table_7_No_controls['CV_NW_t_stats'] = Table_7_No_controls['CV_NW_t_stats'].map(lambda x: f"{x:.2f}")
+
+Table_7_No_controls = Table_7_No_controls.to_markdown()
+with open(os.path.join(Path_Output, 'Table_7_No_controls.md'), 'w') as file:
+    file.write(Table_7_No_controls)
+
+
+#############################  改成論文的表格格式  ############################# (未完成)
+
+Table_7_No_controls = pd.DataFrame(index=range(len(Control_Variable_List) * 2), 
+                                   columns=['CV', 'Stock characteristics'])
+
+for i in range(len(Control_Variable_List)):
+    Table_7_No_controls['CV'][i * 2] = No_controls['variable'][i]
+    Table_7_No_controls['Stock characteristics'][i * 2] = f"{No_controls['mean_coef'][i]:.3f}"
+    Table_7_No_controls['Stock characteristics'][i * 2 + 1] = f"({No_controls['NW_t_value'][i]:.2f})"
+
+Table_7_No_controls = Table_7_No_controls.to_markdown()
+
+with open(os.path.join(Path_Output, 'Table_7_No_controls.md'), 'w') as file:
+    file.write(Table_7_No_controls)
+    
+
+# %%  (2) Control for CW2010_SKEW_op
+
+Control_CW2010_SKEW_op = []
+
+for control_var in Control_Variable_List:
+    mean_betas, t_stats = fama_macbeth_regression(Merge_Data, 'Option_Return', [control_var, 'CW2010_SKEW_op'])
+    
+    for var in enumerate([control_var]):
+        Control_CW2010_SKEW_op.append({
+            'variable': var[1],
+            'const_coef': mean_betas[0],
+            'const_NW_t_stats': t_stats[0],
+            'CV_coef': mean_betas[1],
+            'CV_NW_t_stats': t_stats[1],
+            'CW2010_SKEW_op_coef': mean_betas[2],
+            'CW2010_SKEW_op_NW_t_stats': t_stats[2]
+        })
+
+#############################  GitHub上的易讀版本  #############################
+
+Table_7_Control_CW2010_SKEW_op = pd.DataFrame(Control_CW2010_SKEW_op)
+Table_7_Control_CW2010_SKEW_op['const_coef'] = Table_7_Control_CW2010_SKEW_op['const_coef'].map(lambda x: f"{x:.3f}")
+Table_7_Control_CW2010_SKEW_op['CV_coef'] = Table_7_Control_CW2010_SKEW_op['CV_coef'].map(lambda x: f"{x:.3f}")
+Table_7_Control_CW2010_SKEW_op['CW2010_SKEW_op_coef'] = Table_7_Control_CW2010_SKEW_op['CW2010_SKEW_op_coef'].map(lambda x: f"{x:.3f}")
+
+Table_7_Control_CW2010_SKEW_op['const_NW_t_stats'] = Table_7_Control_CW2010_SKEW_op['const_NW_t_stats'].map(lambda x: f"{x:.2f}")
+Table_7_Control_CW2010_SKEW_op['CV_NW_t_stats'] = Table_7_Control_CW2010_SKEW_op['CV_NW_t_stats'].map(lambda x: f"{x:.2f}")
+Table_7_Control_CW2010_SKEW_op['CW2010_SKEW_op_NW_t_stats'] = Table_7_Control_CW2010_SKEW_op['CW2010_SKEW_op_NW_t_stats'].map(lambda x: f"{x:.2f}")
+
+Table_7_Control_CW2010_SKEW_op = Table_7_Control_CW2010_SKEW_op.to_markdown()
+with open(os.path.join(Path_Output, 'Table_7_Control_CW2010_SKEW_op.md'), 'w') as file:
+    file.write(Table_7_Control_CW2010_SKEW_op)
+    
+
+# %%  (3) Control for CW2010_SKEW_vol
+
+Control_CW2010_SKEW_vol = []
+
+for control_var in Control_Variable_List:
+    mean_betas, t_stats = fama_macbeth_regression(Merge_Data, 'Option_Return', [control_var, 'CW2010_SKEW_vol'])
+    
+    for var in enumerate([control_var]):
+        Control_CW2010_SKEW_vol.append({
+            'variable': var[1],
+            'const_coef': mean_betas[0],
+            'const_NW_t_stats': t_stats[0],
+            'CV_coef': mean_betas[1],
+            'CV_NW_t_stats': t_stats[1],
+            'CW2010_SKEW_vol_coef': mean_betas[2],
+            'CW2010_SKEW_vol_NW_t_stats': t_stats[2]
+        })
+
+#############################  GitHub上的易讀版本  #############################
+
+Table_7_Control_CW2010_SKEW_vol = pd.DataFrame(Control_CW2010_SKEW_vol)
+Table_7_Control_CW2010_SKEW_vol['const_coef'] = Table_7_Control_CW2010_SKEW_vol['const_coef'].map(lambda x: f"{x:.3f}")
+Table_7_Control_CW2010_SKEW_vol['CV_coef'] = Table_7_Control_CW2010_SKEW_vol['CV_coef'].map(lambda x: f"{x:.3f}")
+Table_7_Control_CW2010_SKEW_vol['CW2010_SKEW_vol_coef'] = Table_7_Control_CW2010_SKEW_vol['CW2010_SKEW_vol_coef'].map(lambda x: f"{x:.3f}")
+
+Table_7_Control_CW2010_SKEW_vol['const_NW_t_stats'] = Table_7_Control_CW2010_SKEW_vol['const_NW_t_stats'].map(lambda x: f"{x:.2f}")
+Table_7_Control_CW2010_SKEW_vol['CV_NW_t_stats'] = Table_7_Control_CW2010_SKEW_vol['CV_NW_t_stats'].map(lambda x: f"{x:.2f}")
+Table_7_Control_CW2010_SKEW_vol['CW2010_SKEW_vol_NW_t_stats'] = Table_7_Control_CW2010_SKEW_vol['CW2010_SKEW_vol_NW_t_stats'].map(lambda x: f"{x:.2f}")
+
+Table_7_Control_CW2010_SKEW_vol = Table_7_Control_CW2010_SKEW_vol.to_markdown()
+with open(os.path.join(Path_Output, 'Table_7_Control_CW2010_SKEW_vol.md'), 'w') as file:
+    file.write(Table_7_Control_CW2010_SKEW_vol)
+
