@@ -298,6 +298,18 @@ def fama_macbeth_regression(df, y_col, x_cols):
     return mean_betas, t_stats
 
 
+def format_columns(df):
+    
+    df.set_index('variable', inplace=True)
+    
+    for col in df.columns:
+        if col.startswith('t_stats'):
+            df[col] = df[col].map(lambda x: f"{x:.2f}")
+        elif col.startswith('coef'):
+            df[col] = df[col].map(lambda x: f"{x:.3f}")
+    return df
+
+
 # %%  [ Example ] Single CV Checking
 
 # (1) No controls
@@ -334,20 +346,16 @@ for control_var in Control_Variable_List:
     for var in enumerate([control_var]):
         No_controls.append({
             'variable': var[1],
-            'const_coef': mean_betas[0],
-            'const_NW_t_stats': t_stats[0],
-            'CV_coef': mean_betas[1],
-            'CV_NW_t_stats': t_stats[1]
+            'coef_const': mean_betas[0],
+            't_stats_const': t_stats[0],
+            'coef_CV': mean_betas[1],
+            't_stats_CV': t_stats[1]
         })
 
 #############################  GitHub上的易讀版本  #############################
 
 Table_7_No_controls = pd.DataFrame(No_controls)
-Table_7_No_controls['const_coef'] = Table_7_No_controls['const_coef'].map(lambda x: f"{x:.3f}")
-Table_7_No_controls['CV_coef'] = Table_7_No_controls['CV_coef'].map(lambda x: f"{x:.3f}")
-
-Table_7_No_controls['const_NW_t_stats'] = Table_7_No_controls['const_NW_t_stats'].map(lambda x: f"{x:.2f}")
-Table_7_No_controls['CV_NW_t_stats'] = Table_7_No_controls['CV_NW_t_stats'].map(lambda x: f"{x:.2f}")
+Table_7_No_controls = format_columns(Table_7_No_controls)
 
 Table_7_No_controls = Table_7_No_controls.to_markdown()
 with open(os.path.join(Path_Output, 'Table_7_No_controls.md'), 'w') as file:
@@ -380,24 +388,18 @@ for control_var in Control_Variable_List:
     for var in enumerate([control_var]):
         Control_CW2010_SKEW_op.append({
             'variable': var[1],
-            'const_coef': mean_betas[0],
-            'const_NW_t_stats': t_stats[0],
-            'CV_coef': mean_betas[1],
-            'CV_NW_t_stats': t_stats[1],
-            'CW2010_SKEW_op_coef': mean_betas[2],
-            'CW2010_SKEW_op_NW_t_stats': t_stats[2]
+            'coef_const': mean_betas[0],
+            't_stats_const': t_stats[0],
+            'coef_CV': mean_betas[1],
+            't_stats_CV': t_stats[1],
+            'coef_CW2010_SKEW_op': mean_betas[2],
+            't_stats_CW2010_SKEW_op': t_stats[2]
         })
 
 #############################  GitHub上的易讀版本  #############################
 
 Table_7_Control_CW2010_SKEW_op = pd.DataFrame(Control_CW2010_SKEW_op)
-Table_7_Control_CW2010_SKEW_op['const_coef'] = Table_7_Control_CW2010_SKEW_op['const_coef'].map(lambda x: f"{x:.3f}")
-Table_7_Control_CW2010_SKEW_op['CV_coef'] = Table_7_Control_CW2010_SKEW_op['CV_coef'].map(lambda x: f"{x:.3f}")
-Table_7_Control_CW2010_SKEW_op['CW2010_SKEW_op_coef'] = Table_7_Control_CW2010_SKEW_op['CW2010_SKEW_op_coef'].map(lambda x: f"{x:.3f}")
-
-Table_7_Control_CW2010_SKEW_op['const_NW_t_stats'] = Table_7_Control_CW2010_SKEW_op['const_NW_t_stats'].map(lambda x: f"{x:.2f}")
-Table_7_Control_CW2010_SKEW_op['CV_NW_t_stats'] = Table_7_Control_CW2010_SKEW_op['CV_NW_t_stats'].map(lambda x: f"{x:.2f}")
-Table_7_Control_CW2010_SKEW_op['CW2010_SKEW_op_NW_t_stats'] = Table_7_Control_CW2010_SKEW_op['CW2010_SKEW_op_NW_t_stats'].map(lambda x: f"{x:.2f}")
+Table_7_Control_CW2010_SKEW_op = format_columns(Table_7_Control_CW2010_SKEW_op)
 
 Table_7_Control_CW2010_SKEW_op = Table_7_Control_CW2010_SKEW_op.to_markdown()
 with open(os.path.join(Path_Output, 'Table_7_Control_CW2010_SKEW_op.md'), 'w') as file:
@@ -414,24 +416,18 @@ for control_var in Control_Variable_List:
     for var in enumerate([control_var]):
         Control_CW2010_SKEW_vol.append({
             'variable': var[1],
-            'const_coef': mean_betas[0],
-            'const_NW_t_stats': t_stats[0],
-            'CV_coef': mean_betas[1],
-            'CV_NW_t_stats': t_stats[1],
-            'CW2010_SKEW_vol_coef': mean_betas[2],
-            'CW2010_SKEW_vol_NW_t_stats': t_stats[2]
+            'coef_const': mean_betas[0],
+            't_stats_const': t_stats[0],
+            'coef_CV': mean_betas[1],
+            't_stats_CV': t_stats[1],
+            'coef_CW2010_SKEW_vol': mean_betas[2],
+            'CW2010_SKEW_vol_t_stats': t_stats[2]
         })
 
 #############################  GitHub上的易讀版本  #############################
 
 Table_7_Control_CW2010_SKEW_vol = pd.DataFrame(Control_CW2010_SKEW_vol)
-Table_7_Control_CW2010_SKEW_vol['const_coef'] = Table_7_Control_CW2010_SKEW_vol['const_coef'].map(lambda x: f"{x:.3f}")
-Table_7_Control_CW2010_SKEW_vol['CV_coef'] = Table_7_Control_CW2010_SKEW_vol['CV_coef'].map(lambda x: f"{x:.3f}")
-Table_7_Control_CW2010_SKEW_vol['CW2010_SKEW_vol_coef'] = Table_7_Control_CW2010_SKEW_vol['CW2010_SKEW_vol_coef'].map(lambda x: f"{x:.3f}")
-
-Table_7_Control_CW2010_SKEW_vol['const_NW_t_stats'] = Table_7_Control_CW2010_SKEW_vol['const_NW_t_stats'].map(lambda x: f"{x:.2f}")
-Table_7_Control_CW2010_SKEW_vol['CV_NW_t_stats'] = Table_7_Control_CW2010_SKEW_vol['CV_NW_t_stats'].map(lambda x: f"{x:.2f}")
-Table_7_Control_CW2010_SKEW_vol['CW2010_SKEW_vol_NW_t_stats'] = Table_7_Control_CW2010_SKEW_vol['CW2010_SKEW_vol_NW_t_stats'].map(lambda x: f"{x:.2f}")
+Table_7_Control_CW2010_SKEW_vol = format_columns(Table_7_Control_CW2010_SKEW_vol)
 
 Table_7_Control_CW2010_SKEW_vol = Table_7_Control_CW2010_SKEW_vol.to_markdown()
 with open(os.path.join(Path_Output, 'Table_7_Control_CW2010_SKEW_vol.md'), 'w') as file:
