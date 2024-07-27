@@ -336,7 +336,8 @@ result_2 = pd.DataFrame({
 print(result_2)
 
 
-# %%  (1) No controls
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# (1) No controls
 
 No_controls = []
 
@@ -352,7 +353,7 @@ for control_var in Control_Variable_List:
             't_stats_CV': t_stats[1]
         })
 
-#############################  GitHub上的易讀版本  #############################
+# GitHub上的易讀版本
 
 Table_7_No_controls = pd.DataFrame(No_controls)
 Table_7_No_controls = format_columns(Table_7_No_controls)
@@ -362,7 +363,7 @@ with open(os.path.join(Path_Output, 'Table_7_No_controls.md'), 'w') as file:
     file.write(Table_7_No_controls)
 
 
-#############################  改成論文的表格格式  ############################# (未完成)
+# 改成論文的表格格式 (未完成)
 
 Table_7_No_controls = pd.DataFrame(index=range(len(Control_Variable_List) * 2), 
                                    columns=['CV', 'Stock characteristics'])
@@ -378,7 +379,8 @@ with open(os.path.join(Path_Output, 'Table_7_No_controls.md'), 'w') as file:
     file.write(Table_7_No_controls)
     
 
-# %%  (2) Control for CW2010_SKEW_op
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# (2) Control for CW2010_SKEW_op
 
 Control_CW2010_SKEW_op = []
 
@@ -396,7 +398,7 @@ for control_var in Control_Variable_List:
             't_stats_CW2010_SKEW_op': t_stats[2]
         })
 
-#############################  GitHub上的易讀版本  #############################
+# GitHub上的易讀版本
 
 Table_7_Control_CW2010_SKEW_op = pd.DataFrame(Control_CW2010_SKEW_op)
 Table_7_Control_CW2010_SKEW_op = format_columns(Table_7_Control_CW2010_SKEW_op)
@@ -406,7 +408,8 @@ with open(os.path.join(Path_Output, 'Table_7_Control_CW2010_SKEW_op.md'), 'w') a
     file.write(Table_7_Control_CW2010_SKEW_op)
     
 
-# %%  (3) Control for CW2010_SKEW_vol
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# (3) Control for CW2010_SKEW_vol
 
 Control_CW2010_SKEW_vol = []
 
@@ -424,7 +427,7 @@ for control_var in Control_Variable_List:
             't_stats_CW2010_SKEW_vol': t_stats[2]
         })
 
-#############################  GitHub上的易讀版本  #############################
+# GitHub上的易讀版本
 
 Table_7_Control_CW2010_SKEW_vol = pd.DataFrame(Control_CW2010_SKEW_vol)
 Table_7_Control_CW2010_SKEW_vol = format_columns(Table_7_Control_CW2010_SKEW_vol)
