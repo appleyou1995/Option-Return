@@ -161,7 +161,7 @@ def calculate_statistics(top, bottom):
     
     statistics = {
         'Mean'           : diff.mean(),
-        'T-stat'         : stats.ttest_1samp(diff, 0)[0],
+        # 'T-stat'         : stats.ttest_1samp(diff, 0)[0],
         'NW T-stat'      : nw_t_stat,
         'Min'            : diff.min(),
         'P10'            : np.percentile(diff, 10),
@@ -187,7 +187,7 @@ for sorted_var in Control_Variable_List:
     final_table_option = final_table_option.append(pd.DataFrame(statistics, index=[sorted_var]))
 
 final_table_option = final_table_option[['Mean',
-                                         'T-stat',
+                                         # 'T-stat',
                                          'NW T-stat',
                                          'Min',
                                          'P10',
@@ -201,7 +201,7 @@ final_table_option = final_table_option[['Mean',
                                          'Excess Kurt']]
 
 
-markdown_table_option = final_table_option.applymap(lambda x: '{:.4f}'.format(x)).to_markdown()
+markdown_table_option = final_table_option.applymap(lambda x: '{:.2f}'.format(x)).to_markdown()
 
 with open(os.path.join(Path_Output, 'Table_4_option.md'), 'w') as file:
     file.write(markdown_table_option)
@@ -217,7 +217,7 @@ for sorted_var in Control_Variable_List:
     final_table_stock = final_table_stock.append(pd.DataFrame(statistics, index=[sorted_var]))
 
 final_table_stock = final_table_stock[['Mean',
-                                       'T-stat',
+                                       # 'T-stat',
                                        'NW T-stat',
                                        'Min',
                                        'P10',
@@ -231,7 +231,7 @@ final_table_stock = final_table_stock[['Mean',
                                        'Excess Kurt']]
 
 
-markdown_table_stock = final_table_stock.applymap(lambda x: '{:.4f}'.format(x)).to_markdown()
+markdown_table_stock = final_table_stock.applymap(lambda x: '{:.2f}'.format(x)).to_markdown()
 
 with open(os.path.join(Path_Output, 'Table_4_stock.md'), 'w') as file:
     file.write(markdown_table_stock)
