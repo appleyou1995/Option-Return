@@ -35,6 +35,8 @@ for col in CV.columns: print(col)
 Control_Variable_List = pd.Index(CV.columns[13:27].tolist())
 CV_subset = CV[Control_Variable_List]
 
+CV_subset['RET(-1,0)'] = pd.to_numeric(CV_subset['RET(-1,0)'], errors='coerce')
+
 
 # %%  Summary statistics
 
